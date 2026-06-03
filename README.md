@@ -15,42 +15,22 @@ usual; PLCSIM-WebControl reads that workspace and adds what the GUI doesn't give
   PLC's downloaded program survives a restart. Combined with auto-start, a PLC comes back on its own
   after a reboot — nothing to re-open, nothing to re-download from TIA.
 
-Everything else (a power-on limit, per-PLC IP, network mode, freeze-loop safeguards) is there to make
-those features safe and convenient to run unattended.
-
 > Independent, open-source tool — **not** affiliated with Siemens. It uses the Siemens PLCSIM Advanced
 > API, which you install separately under your own Siemens license. The proprietary Siemens DLL is
 > **not** included here; the tool locates the one already on your machine.
 
 ---
 
-## What it does
+## Other features
 
-**The two main features**
+Beyond remote control and auto-start:
 
-- **Remote web control.** A clean web page lists every PLC in your PLCSIM workspace and lets you power
-  on, RUN, STOP and power off — from this machine or any other machine that can reach it. Manage a
-  headless simulation host without remoting into it.
-- **Automatic instance startup.** Bring one or more PLCs up by themselves at boot. Mode `last` restores
-  whatever was running before the last shutdown (so a reboot returns to where it was);
-  mode `fixed` always starts a chosen PLC. The *service* always runs at startup; auto-starting an
-  *instance* is a separate, optional toggle.
-
-**Supporting features**
-
-- **Persistent by default** — instances are always registered against PLCSIM's native persistent
-  storage (`storage_layout = default`), so a PLC's downloaded program survives restarts; download it
-  from TIA Portal once and it's there after every reboot.
 - **Power-on limit** (default **1**) with a separate, disk-only **hard safety cap**, so you never start
   more PLCs than the machine can actually handle.
 - **Per-PLC IP override**, re-applied on every power-on, so a PLC stays reachable on your subnet.
-- **Network mode** selection: Softbus (zero-config) or TCP/IP mapped to a host adapter.
-- **Unattended-boot safeguards** that keep automatic startup from getting a machine stuck in a
-  freeze/restart loop (see below).
-
-> Instances themselves are **created and configured in the Siemens PLCSIM Advanced GUI** (and programs
-> are downloaded from TIA Portal). PLCSIM-WebControl is an extension on top of that workflow, not a
-> replacement for it.
+- **Network mode**: Softbus (zero-config) or TCP/IP mapped to a host adapter.
+- **Unattended-boot safeguards** that keep auto-start from getting a machine stuck in a freeze/restart
+  loop ([details below](#safeguards-for-unattended-operation)).
 
 ---
 
@@ -74,8 +54,8 @@ those features safe and convenient to run unattended.
    .\scripts\install.ps1
    ```
    The installer builds the executable, detects your PLCSIM Advanced install, makes the UI reachable
-   from the LAN (the default — it opens the firewall for the port), and registers an always-on
-   Scheduled Task. Pass `-LocalOnly` if you'd rather bind it to localhost.
+   from the LAN by default (no authentication; it opens the firewall for the port), and registers an
+   always-on Scheduled Task. Pass `-LocalOnly` to bind it to localhost instead.
 3. Open the UI:
    - on this machine: **http://localhost:8090**
    - from another machine: **http://&lt;this-machine-ip&gt;:8090**
@@ -134,19 +114,6 @@ count as healthy. After `boot_fail_limit` consecutive boots that never stabilize
 next boot — handy right before you force-restart a sluggish machine.
 
 See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for every tunable.
-
----
-
-## Security
-
-This tool is built for **trusted, closed development / simulation networks** — the kind of isolated lab
-or VM environment where PLCSIM is normally used. To make remote control effortless, it **binds to the
-LAN by default and has no authentication**: anyone who can reach the web port can power PLCs on and off.
-
-- That is intentional for closed networks. If you'd rather keep it local, install with `-LocalOnly`
-  (binds to `localhost`).
-- Do not place it on an untrusted network or expose it directly to the internet. If you ever need
-  remote access across the internet, put it behind a VPN or a reverse proxy that adds authentication.
 
 ---
 
