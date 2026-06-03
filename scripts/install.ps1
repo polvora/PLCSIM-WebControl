@@ -8,13 +8,13 @@
 # auto-logon (see scripts\setup-autologon.ps1).
 #
 # Usage:
-#   .\install.ps1                 # interactive, localhost-only (recommended)
-#   .\install.ps1 -Port 8090
-#   .\install.ps1 -Lan            # also expose the UI to the LAN (urlacl + firewall)
+#   .\install.ps1                 # interactive; LAN-open by default (remote access is the main feature)
+#   .\install.ps1 -Port 8091
+#   .\install.ps1 -LocalOnly      # bind to localhost only (this machine's browser only)
 
 param(
     [int]$Port = 8090,
-    [switch]$Lan,
+    [switch]$LocalOnly,
     [string]$TaskName = "PLCSIM WebControl"
 )
 
@@ -47,18 +47,21 @@ $api = Get-ChildItem -Path @("$env:ProgramFiles\Siemens\Automation","${env:Progr
 if ($api) { Write-Host "Found PLCSIM Advanced API DLL: $api" -ForegroundColor Green }
 else { Write-Warning "PLCSIM Advanced API DLL not found. Install S7-PLCSIM Advanced before starting the service, or set api_dll_path in appconfig.txt." }
 
-# 3) Ask about network exposure (unless -Lan was passed).
-if (-not $Lan) {
+# 3) Network exposure. Default = LAN (remote control is the main feature). -LocalOnly forces localhost.
+$Lan = $true
+if ($LocalOnly) {
+    $Lan = $false
+} else {
     Write-Host ""
     Write-Host "Network exposure:" -ForegroundColor Cyan
-    Write-Host "  [1] localhost only   (recommended - the UI has NO authentication)"
-    Write-Host "  [2] expose to the LAN (any machine on your network can control the PLCs)"
+    Write-Host "  [1] LAN - reachable from other machines on your network (default; the main feature)"
+    Write-Host "  [2] localhost only - this machine's browser only"
     $choice = Read-Host "Choose 1 or 2 [1]"
-    if ($choice -eq "2") { $Lan = $true }
+    if ($choice -eq "2") { $Lan = $false }
 }
 if ($Lan) {
     $bindHost = "+"
-    Write-Warning "Exposing to the LAN. The UI has NO authentication - only do this on a trusted network."
+    Write-Host "Binding to all interfaces (LAN). Note: the UI has no authentication - intended for trusted / closed networks."
 } else {
     $bindHost = "localhost"
 }

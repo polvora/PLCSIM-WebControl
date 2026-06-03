@@ -12,7 +12,7 @@ Start from `appconfig.example.txt`.
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `http_prefix` | `http://localhost:8090/` | Listen URL. `localhost` = local only (recommended). `http://+:8090/` = all interfaces / LAN (needs a `netsh http add urlacl` reservation + firewall rule; the installer's `-Lan` option does this). |
+| `http_prefix` | `http://+:8090/` | Listen URL. `http://+:8090/` = all interfaces / LAN (the default; remote control is the main feature). Use `http://localhost:8090/` for local-only access. The installer reserves the URL (`netsh http add urlacl`) and opens the firewall when binding to the LAN. |
 
 ## Workspace
 

@@ -199,7 +199,7 @@ internal sealed class Config
 {
     public string Path;
     public string ExeDir;
-    public string HttpPrefix = "http://localhost:8090/";
+    public string HttpPrefix = "http://+:8090/";   // bind to all interfaces (LAN) by default; remote access is the main feature
     public string Workspace;            // Documents\PLCSIM\<workspace>
     public string WorkspaceRoot;        // Documents\PLCSIM
     public bool AutostartEnabled = false;

@@ -6,9 +6,10 @@
 # Full reference: docs/CONFIGURATION.md
 
 # ---- Web server ----
-# URL the service listens on. Use localhost for local-only access (recommended, no auth).
-# Use http://+:8090/ to expose to the LAN (requires a urlacl reservation + firewall rule; see docs).
-http_prefix = http://localhost:8090/
+# URL the service listens on. Default http://+:8090/ = all interfaces (reachable from the LAN),
+# because remote control is the main feature. The installer also opens the firewall for the port.
+# Use http://localhost:8090/ instead if you want local-only access.
+http_prefix = http://+:8090/
 
 # ---- Workspace ----
 # Folder that contains your PLCSIM workspaces. Blank = <Documents>\PLCSIM of the account running the service.

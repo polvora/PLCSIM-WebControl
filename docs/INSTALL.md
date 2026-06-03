@@ -17,7 +17,8 @@
    The script will:
    - build `PlcWebControl.exe` if it isn't present,
    - confirm the PLCSIM Advanced API DLL was found,
-   - ask whether to bind **localhost only** (recommended) or **expose to the LAN**,
+   - make the UI reachable from the **LAN by default** (opens the firewall for the port; pass
+     `-LocalOnly` to bind to localhost instead),
    - create `appconfig.txt` from the template,
    - register an always-on Scheduled Task named **"PLCSIM WebControl"**,
    - optionally start the service immediately.
@@ -56,17 +57,20 @@ Scheduled Task and starts the service.
 
 Read the security warning at the top of the script before running it.
 
-## 5. Exposing the UI to the LAN
+## 5. LAN access (default) vs localhost-only
 
-Either pass `-Lan` to the installer or choose option 2 when prompted:
+By default the installer makes the UI reachable from the LAN: it sets `http_prefix = http://+:8090/`,
+reserves the URL for your account (`netsh http add urlacl`), and opens an inbound firewall rule for
+TCP 8090. Other machines then reach it at `http://<this-machine-ip>:8090`. Remote control is the main
+feature, so this is the default.
+
+To bind to localhost only instead:
 ```powershell
-.\scripts\install.ps1 -Lan
+.\scripts\install.ps1 -LocalOnly
 ```
-This sets `http_prefix = http://+:8090/`, reserves the URL for your account
-(`netsh http add urlacl`), and opens an inbound firewall rule for TCP 8090. Other machines then reach
-it at `http://<this-machine-ip>:8090`.
 
-> The UI has no authentication. Only expose it on a trusted network, and never directly to the internet.
+> The UI has no authentication; it is meant for trusted, closed networks. Don't place it on an
+> untrusted network or expose it directly to the internet.
 
 ## 6. Uninstall
 

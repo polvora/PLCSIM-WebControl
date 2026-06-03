@@ -67,13 +67,14 @@ those two features safe and convenient to run unattended.
    ```powershell
    .\scripts\install.ps1
    ```
-   The installer builds the executable, detects your PLCSIM Advanced install, asks whether to keep the
-   UI local-only (recommended) or expose it to the LAN, and registers an always-on Scheduled Task.
-3. Open **http://localhost:8090** in a browser.
+   The installer builds the executable, detects your PLCSIM Advanced install, makes the UI reachable
+   from the LAN (the default — it opens the firewall for the port), and registers an always-on
+   Scheduled Task. Pass `-LocalOnly` if you'd rather bind it to localhost.
+3. Open the UI:
+   - on this machine: **http://localhost:8090**
+   - from another machine: **http://&lt;this-machine-ip&gt;:8090**
 
 That's it. To remove it later, run `.\scripts\uninstall.ps1` as administrator.
-
-> **Heads-up:** the UI has **no password**. Keep it on `localhost` unless you are on a trusted network.
 
 ---
 
@@ -132,13 +133,14 @@ See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for every tunable.
 
 ## Security
 
-This tool has **no authentication**. Anyone who can reach the web port can power your PLCs on and off.
+This tool is built for **trusted, closed development / simulation networks** — the kind of isolated lab
+or VM environment where PLCSIM is normally used. To make remote control effortless, it **binds to the
+LAN by default and has no authentication**: anyone who can reach the web port can power PLCs on and off.
 
-- It binds to **localhost** by default.
-- Only expose it to a network you trust (the installer's LAN option adds a firewall rule + URL
-  reservation, nothing more).
-- Never expose it directly to the internet. If you must reach it remotely, put it behind a reverse
-  proxy / VPN that adds authentication.
+- That is intentional for closed networks. If you'd rather keep it local, install with `-LocalOnly`
+  (binds to `localhost`).
+- Do not place it on an untrusted network or expose it directly to the internet. If you ever need
+  remote access across the internet, put it behind a VPN or a reverse proxy that adds authentication.
 
 ---
 
