@@ -109,7 +109,6 @@
         <option value="fixed">Fixed instance</option>
       </select>
       <select id="asInstance"></select>
-      <button class="primary" id="asSave">Save</button>
     </div>
     <div class="note" id="asNote" style="margin-top:8px"></div>
     <div class="note warn" id="hardNote" style="margin-top:10px"></div>
@@ -263,7 +262,6 @@ async function saveAutostart(){ const r=await api('autostart',{enabled:$('#asEna
 $('#asEnabled').onchange = saveAutostart;
 $('#asInstance').onchange = saveAutostart;
 $('#asMode').onchange = () => { $('#asInstance').style.display = ($('#asMode').value==='fixed')?'':'none'; saveAutostart(); };
-$('#asSave').onclick = saveAutostart;
 $('#maxSave').onclick = async () => { const r=await api('limit',{max:Number($('#maxOn').value)||1}); toast(r.message,r.ok); await load(); };
 $('#safeClear').onclick = async () => { const r=await api('clear-safemode',{}); toast(r.message,r.ok); await load(); };
 $('#suppressNext').onchange = async e => { const r=await api('safemode',{enabled:e.target.checked}); toast(r.message,r.ok); await load(); };
