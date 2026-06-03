@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PLCSIM Control</title>
+<style>
+  :root{--bg:#0f141a;--card:#19212b;--line:#2a3543;--mut:#8a99ab;--fg:#e7edf3;--ac:#3b82f6;
+        --on:#22c55e;--off:#64748b;--stop:#f59e0b;--bad:#ef4444}
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.5 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+  header{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:600}
+  .pill{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mut)}
+  .pill.ok{color:var(--on);border-color:#1c5}
+  .pill.bad{color:var(--bad);border-color:#a33}
+  main{max-width:1000px;margin:0 auto;padding:24px;display:grid;gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:0 0 14px}
+  .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .sp{justify-content:space-between}
+  select,input{background:#0e151d;border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:8px 10px;font:inherit}
+  button{border:1px solid var(--line);background:#222d3a;color:var(--fg);border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
+  button:hover{border-color:var(--ac)}
+  button.primary{background:var(--ac);border-color:var(--ac);color:#fff}
+  button.danger{background:#3a2326;border-color:#7a3b40;color:#ffd7d9}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line)}
+  th{font-size:12px;color:var(--mut);font-weight:500}
+  .badge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;display:inline-block}
+  .b-Run{background:#0f3d22;color:var(--on)}
+  .b-Stop{background:#3d2f0f;color:var(--stop)}
+  .b-Off{background:#222b36;color:var(--off)}
+  .b-Booting,.b-Startup,.b-ShuttingDown{background:#13314d;color:#6db1ff}
+  .name{font-weight:600}.sub{font-size:12px;color:var(--mut)}
+  .actions{display:flex;gap:6px;justify-content:flex-end}
+  .toggle{position:relative;width:46px;height:26px}
+  .toggle input{display:none}
+  .toggle span{position:absolute;inset:0;background:#33404f;border-radius:999px;transition:.2s}
+  .toggle span:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .toggle input:checked+span{background:var(--on)}
+  .toggle input:checked+span:before{transform:translateX(20px)}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222d3a;border:1px solid var(--line);
+         border-radius:10px;padding:11px 18px;opacity:0;transition:.25s;pointer-events:none;max-width:90%}
+  #toast.show{opacity:1}
+  #toast.ok{border-color:#1c5}#toast.bad{border-color:#a33}
+  .note{font-size:13px;color:var(--mut);margin-top:4px}
+  .warn{color:var(--stop)}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚙️ PLCSIM Advanced — Control</h1>
+  <span class="pill" id="rt">runtime…</span>
+  <span class="pill" id="net">network…</span>
+  <span class="pill" id="onpill">—</span>
+  <span style="flex:1"></span>
+  <span class="sub" id="clock"></span>
+</header>
+
+<main>
+  <div id="safebanner" style="display:none;background:#3a1d1d;border:1px solid var(--bad);border-radius:12px;padding:16px 20px">
+    <div class="row sp">
+      <div>
+        <div style="font-weight:700;color:#ffb4b4;font-size:15px">🛡️ SAFE MODE — auto-start disabled</div>
+        <div class="note" id="safeReason" style="color:#ffd7d9;margin-top:6px"></div>
+      </div>
+      <button class="primary" id="safeClear">Re-enable auto-start</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row sp">
+      <h2 style="margin:0">Workspace</h2>
+      <div class="row">
+        <select id="ws"></select>
+        <button id="refresh">↻ Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row sp">
+      <h2 style="margin:0">Workspace PLCs</h2>
+      <div class="row">
+        <label class="sub">Max powered on at once:</label>
+        <input id="maxOn" type="number" min="1" max="20" style="width:60px">
+        <button id="maxSave">Apply</button>
+      </div>
+    </div>
+    <div class="note warn" id="limitNote" style="margin-top:10px"></div>
+    <table>
+      <thead><tr><th>Instance</th><th>State</th><th style="text-align:right">Actions</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Instance auto-start</h2>
+    <div class="note">The <b>service</b> always runs at Windows startup. This controls whether, in addition, one or more PLCs are <b>powered on automatically</b> at boot.</div>
+    <div class="row" style="margin-top:12px">
+      <label class="toggle"><input type="checkbox" id="asEnabled"><span></span></label>
+      <span>Enabled</span>
+      <span style="flex:1"></span>
+      <label class="sub">Mode:</label>
+      <select id="asMode">
+        <option value="last">Whatever was last running</option>
+        <option value="fixed">Fixed instance</option>
+      </select>
+      <select id="asInstance"></select>
+      <button class="primary" id="asSave">Save</button>
+    </div>
+    <div class="note" id="asNote" style="margin-top:8px"></div>
+    <div class="note warn" id="hardNote" style="margin-top:10px"></div>
+    <div class="row" style="margin-top:10px">
+      <label class="toggle"><input type="checkbox" id="suppressNext"><span></span></label>
+      <span class="sub">Suppress auto-start on the <b>next boot</b> (manual safe mode — use it before a forced restart)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Network communication</h2>
+    <div class="row" style="margin-top:4px">
+      <label class="sub">Mode:</label>
+      <select id="netMode">
+        <option value="Softbus">PLCSIM (Softbus) — default, no adapter</option>
+        <option value="TCPIPMultipleAdapter">TCP/IP Multiple Adapter</option>
+        <option value="TCPIPSingleAdapter">TCP/IP Single Adapter</option>
+      </select>
+      <label class="sub">Adapter:</label>
+      <select id="netAdapter" style="min-width:280px"></select>
+      <button class="primary" id="netSave">Apply</button>
+    </div>
+    <div class="note" id="netNote">Softbus works out of the box. Choose a TCP/IP mode + a host adapter only if you need real Ethernet communication with the PLCs.</div>
+  </div>
+
+  <div class="card">
+    <div class="note warn">⚠️ This interface has <b>no authentication</b>. Anyone who can reach it can power PLCs on/off. Keep it bound to <b>localhost</b> unless you are on a trusted network, and never expose it to the internet without a reverse proxy that adds authentication.</div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+let S = null, busy = false;
+
+function toast(msg, ok){ const t=$('#toast'); t.textContent=msg; t.className='show '+(ok?'ok':'bad'); setTimeout(()=>t.className='',2600); }
+async function api(ep, body){
+  const o = { method: body?'POST':'GET', headers:{'Content-Type':'application/json'} };
+  if(body) o.body = JSON.stringify(body);
+  const r = await fetch('/api/'+ep, o); return r.json();
+}
+async function act(ep, name){
+  if(busy) return; busy=true;
+  try{ const r = await api(ep, {name}); toast(r.message||r.error||'ok', r.ok); }
+  catch(e){ toast('Error: '+e.message,false); }
+  busy=false; await load();
+}
+
+async function changeIp(name, current){
+  const ip = prompt(`New IP for ${name} (must be on the same subnet your PLCs/clients use):`, current||'192.168.0.10');
+  if(!ip) return;
+  const mask = prompt('Subnet mask:', '255.255.255.0'); if(mask===null) return;
+  const gw = prompt('Gateway (0.0.0.0 if none):', '0.0.0.0'); if(gw===null) return;
+  if(busy) return; busy=true;
+  try{ const r = await api('setip', {name, ip, mask:mask||'255.255.255.0', gateway:gw||'0.0.0.0'}); toast(r.message||r.error||'ok', r.ok); }
+  catch(e){ toast('Error: '+e.message, false); }
+  busy=false; await load();
+}
+
+function badge(state){ return `<span class="badge b-${state}">${state}</span>`; }
+
+function renderRows(){
+  const tb=$('#rows'); tb.innerHTML='';
+  const onList = S.poweredOnList||[];
+  const max = S.maxPoweredOn||1;
+  const atLimit = onList.length >= max;
+  for(const it of S.instances){
+    const tr=document.createElement('tr');
+    // Blocked only if this PLC is off and the power-on limit is already reached.
+    const blocked = !it.poweredOn && atLimit;
+    const active = onList.includes(it.name);
+    tr.innerHTML = `
+      <td><div class="name">${it.name}</div><div class="sub">${it.plcName||''}${it.ip?` · IP ${it.ip}`:''}${it.configured?'':' · not configured'}</div></td>
+      <td>${badge(it.state)}${active?' <span class="sub">◀ active</span>':''}</td>
+      <td><div class="actions">
+        <button class="primary" data-a="start" data-n="${it.name}" ${blocked?`disabled title="Limit of ${max} powered on reached; power one off first"`:''}>${it.running?'Restart':'Power on + RUN'}</button>
+        <button data-a="stop" data-n="${it.name}" ${it.running?'':'disabled'}>STOP</button>
+        <button class="danger" data-a="poweroff" data-n="${it.name}" ${it.poweredOn?'':'disabled'}>Power off</button>
+        <button data-a="setip" data-n="${it.name}" data-ip="${it.ip||''}" ${it.poweredOn?'':'disabled title="Power on the PLC first"'}>IP…</button>
+      </div></td>`;
+    tb.appendChild(tr);
+  }
+  tb.querySelectorAll('button[data-a]').forEach(b=>{
+    if(b.dataset.a==='setip') b.onclick=()=>changeIp(b.dataset.n, b.dataset.ip);
+    else b.onclick=()=>act(b.dataset.a, b.dataset.n);
+  });
+}
+
+function renderControls(){
+  // header pills
+  $('#rt').textContent = S.runtime?'runtime OK':'runtime OFF';
+  $('#rt').className = 'pill '+(S.runtime?'ok':'bad');
+  $('#net').textContent = S.network.mode + (S.network.adapterName? ' · '+S.network.adapterName : '');
+  const onList = S.poweredOnList||[], max = S.maxPoweredOn||1, hard = S.hardMaxPoweredOn||max;
+  $('#onpill').textContent = 'Powered on: '+onList.length+'/'+max;
+  $('#onpill').className = 'pill '+(onList.length?'ok':'');
+
+  // safe-mode banner
+  const sb=$('#safebanner');
+  if(S.safeMode){ sb.style.display=''; $('#safeReason').textContent = S.safeModeReason||'Auto-start disabled.'; }
+  else sb.style.display='none';
+
+  // limit (the web UI never exceeds the hard safety cap)
+  const mo=$('#maxOn'); mo.max=hard; if(document.activeElement!==mo) mo.value = max;
+  $('#limitNote').innerHTML = (max===1
+    ? 'Rule: only <b>one PLC powered on</b> at a time. Powering on another is <b>blocked</b> — power the active one off first.'
+    : `Rule: at most <b>${max} PLCs powered on</b> at a time. Once the limit is reached, powering on another is <b>blocked</b> until you power one off.`);
+
+  // workspace dropdown
+  const ws=$('#ws'); if(document.activeElement!==ws){ ws.innerHTML='';
+    for(const w of S.workspaces){ const o=document.createElement('option'); o.value=w.name; o.textContent=w.name; o.selected=w.current; ws.appendChild(o);} }
+
+  // autostart
+  $('#asEnabled').checked = S.autostart.enabled;
+  const mode = S.autostart.mode||'last';
+  if(document.activeElement!==$('#asMode')) $('#asMode').value = mode;
+  const ai=$('#asInstance'); ai.style.display = (mode==='fixed')?'':'none';
+  if(document.activeElement!==ai){ ai.innerHTML='';
+    for(const it of S.instances){ const o=document.createElement('option'); o.value=it.name; o.textContent=it.name; o.selected=it.name===S.autostart.instance; ai.appendChild(o);} }
+  const last=(S.autostart.last||[]);
+  $('#asNote').innerHTML = (mode==='fixed')
+    ? 'At server startup it will always start the selected fixed instance.'
+    : ('At server startup it will restore <b>whatever was powered on</b> last time'+(last.length?': <b>'+last.join(', ')+'</b>':' (right now: none)')+'.');
+  $('#hardNote').innerHTML = `🛡️ Safety cap for this machine: <b>${hard} PLCs powered on</b> (set on disk, not editable here). The operational limit above never exceeds it. Do not raise the load beyond this number or the machine may <b>freeze</b>.`;
+  if(document.activeElement!==$('#suppressNext')) $('#suppressNext').checked = !!S.suppressNextBoot;
+
+  // network
+  if(document.activeElement!==$('#netMode')) $('#netMode').value = S.network.mode;
+}
+
+async function loadAdapters(){
+  const r = await api('adapters');
+  const sel=$('#netAdapter'); if(document.activeElement===sel) return;
+  sel.innerHTML='';
+  for(const a of (r.adapters||[])){
+    const o=document.createElement('option'); o.value=a.index;
+    o.textContent = `${a.name} — ${a.description}`+(a.bound?' (bound)':'');
+    o.dataset.name=a.name; o.selected=(a.index==S.network.adapterIndex); sel.appendChild(o);
+  }
+}
+
+async function load(){
+  try{ S = await api('status'); }catch(e){ $('#rt').textContent='no connection'; $('#rt').className='pill bad'; return; }
+  renderControls(); renderRows();
+}
+
+$('#refresh').onclick = load;
+$('#ws').onchange = async e => { const r=await api('select-workspace',{name:e.target.value}); toast(r.message,r.ok); await load(); };
+$('#asMode').onchange = e => { $('#asInstance').style.display = (e.target.value==='fixed')?'':'none'; };
+$('#asSave').onclick = async () => { const r=await api('autostart',{enabled:$('#asEnabled').checked, mode:$('#asMode').value, instance:$('#asInstance').value}); toast(r.message,r.ok); await load(); };
+$('#maxSave').onclick = async () => { const r=await api('limit',{max:Number($('#maxOn').value)||1}); toast(r.message,r.ok); await load(); };
+$('#safeClear').onclick = async () => { const r=await api('clear-safemode',{}); toast(r.message,r.ok); await load(); };
+$('#suppressNext').onchange = async e => { const r=await api('safemode',{enabled:e.target.checked}); toast(r.message,r.ok); await load(); };
+$('#netSave').onclick = async () => {
+  const opt=$('#netAdapter').selectedOptions[0];
+  const r=await api('network',{mode:$('#netMode').value, adapterIndex:Number($('#netAdapter').value), adapterName:opt?opt.dataset.name:''});
+  toast(r.message,r.ok); await load();
+};
+setInterval(()=>{ $('#clock').textContent=new Date().toLocaleTimeString(); }, 1000);
+(async()=>{ await load(); await loadAdapters(); setInterval(load, 3000); })();
+</script>
+</body>
+</html>

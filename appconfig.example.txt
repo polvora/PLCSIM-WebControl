@@ -1,0 +1,63 @@
+# PLC-WebControl configuration template.
+# The installer copies this to appconfig.txt next to the executable.
+# The service rewrites appconfig.txt when you change settings from the web UI,
+# so edit it manually only while the service is STOPPED.
+# A blank value means "use the built-in default".
+# Full reference: docs/CONFIGURATION.md
+
+# ---- Web server ----
+# URL the service listens on. Use localhost for local-only access (recommended, no auth).
+# Use http://+:8090/ to expose to the LAN (requires a urlacl reservation + firewall rule; see docs).
+http_prefix = http://localhost:8090/
+
+# ---- Workspace ----
+# Folder that contains your PLCSIM workspaces. Blank = <Documents>\PLCSIM of the account running the service.
+workspace_root =
+# Active workspace folder. Blank = auto-detect the most recently used one.
+workspace =
+
+# ---- Instance auto-start ----
+autostart_enabled = false
+# last  = restore whatever was powered on before the last shutdown.
+# fixed = always power on the single instance named in autostart_instance.
+autostart_mode = last
+autostart_instance =
+
+# ---- Power-on limit ----
+# Operational limit (also editable from the web UI).
+max_powered_on = 1
+# HARD safety cap = real capacity of this machine. Editable on disk ONLY; the web UI never exceeds it.
+# Set this to how many PLCs your machine can run without freezing.
+hard_max_powered_on = 4
+
+# ---- Boot protections (loop-breaker) ----
+# Consecutive boots that never stabilize before the service enters SAFE MODE and skips auto-start.
+boot_fail_limit = 2
+# Stability window (seconds) after auto-start before a boot is declared "clean".
+stable_seconds = 90
+# Pause (ms) between power-ons during the staggered auto-start.
+start_stagger_ms = 4000
+# Self /health probe cadence and strict timeout (detects a "soft freeze" of the web layer).
+health_probe_interval_ms = 15000
+health_timeout_ms = 3000
+# Internal state; leave blank.
+last_running =
+
+# ---- Network ----
+# Softbus = zero-config simulation bus (default). TCPIPSingleAdapter / TCPIPMultipleAdapter = real Ethernet.
+network_mode = Softbus
+# Host adapter ifIndex + name (only used for TCP/IP modes; pick it from the web UI).
+adapter_index = 0
+adapter_name =
+
+# ---- Advanced ----
+# Instance storage layout. "default" uses PLCSIM's native persistent storage (recommended).
+storage_layout = default
+poweron_timeout = 60000
+run_timeout = 60000
+# How long to wait for the PLCSIM runtime manager at startup (seconds).
+connect_wait_seconds = 120
+# Explicit path to Siemens.Simatic.Simulation.Runtime.Api.x64.dll. Blank = auto-detect the installed PLCSIM Advanced.
+api_dll_path =
+# Log file path. Blank = webcontrol.log next to the executable.
+log =
