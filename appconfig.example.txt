@@ -1,4 +1,4 @@
-# PLC-WebControl configuration template.
+# PLCSIM-WebControl configuration template.
 # The installer copies this to appconfig.txt next to the executable.
 # The service rewrites appconfig.txt when you change settings from the web UI,
 # so edit it manually only while the service is STOPPED.

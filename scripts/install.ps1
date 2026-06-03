@@ -1,4 +1,4 @@
-# install.ps1 - Guided installer for PLC-WebControl.
+# install.ps1 - Guided installer for PLCSIM-WebControl.
 #
 # RUN THIS IN AN ELEVATED POWERSHELL (Run as administrator).
 #
@@ -32,7 +32,7 @@ function Assert-Admin {
 }
 Assert-Admin
 
-Write-Host "==== PLC-WebControl installer ====" -ForegroundColor Cyan
+Write-Host "==== PLCSIM-WebControl installer ====" -ForegroundColor Cyan
 
 # 1) Build the executable if it is missing.
 if (-not (Test-Path $exe)) {

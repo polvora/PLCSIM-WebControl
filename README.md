@@ -1,10 +1,10 @@
-# PLC-WebControl
+# PLCSIM-WebControl
 
 **Remote web control and automatic startup for Siemens S7-PLCSIM Advanced virtual PLCs.**
 
-PLC-WebControl is a small always-on web app that **extends** S7-PLCSIM Advanced — it does **not**
+PLCSIM-WebControl is a small always-on web app that **extends** S7-PLCSIM Advanced — it does **not**
 replace it. You still create and configure your virtual PLCs in the Siemens PLCSIM Advanced GUI as
-usual; PLC-WebControl reads that workspace and adds what the GUI doesn't give you:
+usual; PLCSIM-WebControl reads that workspace and adds what the GUI doesn't give you:
 
 - 🌐 **Remote control from a browser** — power on, RUN, STOP and power off your PLCs from any machine
   on the network. Drive a simulation host from your own desktop or another VM, with no Siemens GUI and
@@ -49,7 +49,7 @@ those features safe and convenient to run unattended.
   freeze/restart loop (see below).
 
 > Instances themselves are **created and configured in the Siemens PLCSIM Advanced GUI** (and programs
-> are downloaded from TIA Portal). PLC-WebControl is an extension on top of that workflow, not a
+> are downloaded from TIA Portal). PLCSIM-WebControl is an extension on top of that workflow, not a
 > replacement for it.
 
 ---
@@ -67,8 +67,8 @@ those features safe and convenient to run unattended.
 
 ## Quick start (no programming needed)
 
-1. **Download** the latest `PLC-WebControl-x.y.z.zip` from the [Releases](../../releases) page and
-   extract it anywhere (e.g. `C:\PLC-WebControl`).
+1. **Download** the latest `PLCSIM-WebControl-x.y.z.zip` from the [Releases](../../releases) page and
+   extract it anywhere (e.g. `C:\PLCSIM-WebControl`).
 2. Open **PowerShell as administrator** in that folder and run:
    ```powershell
    .\scripts\install.ps1

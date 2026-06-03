@@ -1,4 +1,4 @@
-# uninstall.ps1 - Removes the PLC-WebControl scheduled task and (optionally) its LAN bindings.
+# uninstall.ps1 - Removes the PLCSIM-WebControl scheduled task and (optionally) its LAN bindings.
 #
 # RUN THIS IN AN ELEVATED POWERSHELL (Run as administrator).
 # It does NOT delete the program files, your appconfig.txt, logs, or PLCSIM workspaces.

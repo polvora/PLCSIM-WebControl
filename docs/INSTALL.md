@@ -8,8 +8,8 @@
 
 ## 2. Install
 
-1. Download `PLC-WebControl-x.y.z.zip` from the Releases page and extract it to a folder you control,
-   e.g. `C:\PLC-WebControl`.
+1. Download `PLCSIM-WebControl-x.y.z.zip` from the Releases page and extract it to a folder you control,
+   e.g. `C:\PLCSIM-WebControl`.
 2. Right-click **PowerShell → Run as administrator**, change into that folder, and run:
    ```powershell
    .\scripts\install.ps1

@@ -1,4 +1,4 @@
-# setup-autologon.ps1 - OPTIONAL helper to enable Windows auto-logon, so the PLC-WebControl
+# setup-autologon.ps1 - OPTIONAL helper to enable Windows auto-logon, so the PLCSIM-WebControl
 # service starts unattended after a reboot (PLCSIM Advanced needs an interactive session).
 #
 # RUN THIS IN AN ELEVATED POWERSHELL (Run as administrator).

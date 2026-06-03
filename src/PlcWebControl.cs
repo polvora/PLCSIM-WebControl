@@ -59,7 +59,7 @@ internal static class Program
         _cfg = Config.Load(Path.Combine(exeDir, "appconfig.txt"), exeDir);
         Log.File = _cfg.LogFile;
         Log.Write("==================================================================");
-        Log.Write("PLC-WebControl starting. workspace='" + _cfg.Workspace + "' prefix='" + _cfg.HttpPrefix + "'");
+        Log.Write("PLCSIM-WebControl starting. workspace='" + _cfg.Workspace + "' prefix='" + _cfg.HttpPrefix + "'");
         Log.Write("PLCSIM Advanced API DLL: " + (string.IsNullOrEmpty(_apiDllPath) ? "NOT FOUND (set api_dll_path in appconfig.txt)" : _apiDllPath));
 
         _plc = new PlcManager(_cfg);
@@ -307,7 +307,7 @@ internal sealed class Config
     public void Save()
     {
         var sb = new StringBuilder();
-        sb.AppendLine("# PLC-WebControl config (auto-written; edit while the service is stopped).");
+        sb.AppendLine("# PLCSIM-WebControl config (auto-written; edit while the service is stopped).");
         sb.AppendLine("# See docs/CONFIGURATION.md for the meaning of every key.");
         sb.AppendLine("http_prefix = " + HttpPrefix);
         sb.AppendLine("workspace_root = " + WorkspaceRoot);

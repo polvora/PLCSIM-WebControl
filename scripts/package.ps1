@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 $root  = Split-Path -Parent $PSScriptRoot
 $dist  = Join-Path $root "dist"
-$stage = Join-Path $dist "PLC-WebControl-$Version"
+$stage = Join-Path $dist "PLCSIM-WebControl-$Version"
 
 # 1) Build the executable against the local Siemens API DLL.
 & (Join-Path $PSScriptRoot "build.ps1")
@@ -27,7 +27,7 @@ Copy-Item (Join-Path $root "scripts")  (Join-Path $stage "scripts")  -Recurse
 Copy-Item (Join-Path $root "docs")     (Join-Path $stage "docs")     -Recurse
 
 # 3) Zip it.
-$zip = Join-Path $dist "PLC-WebControl-$Version.zip"
+$zip = Join-Path $dist "PLCSIM-WebControl-$Version.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path "$stage\*" -DestinationPath $zip -Force
 
