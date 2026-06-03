@@ -9,11 +9,11 @@ usual; PLC-WebControl reads that workspace and adds what the GUI doesn't give yo
 - 🌐 **Remote control from a browser** — power on, RUN, STOP and power off your PLCs from any machine
   on the network. Drive a simulation host from your own desktop or another VM, with no Siemens GUI and
   no remote-desktop session required.
-- 🔄 **Automatic startup** — have your PLCs come back up on their own after a server reboot or power
-  cut, completely unattended. The original GUI can't do this.
+- 🔄 **Automatic startup** — have your PLCs come back up on their own after a server reboot,
+  completely unattended. The original GUI can't do this.
 - 💾 **Persistent by default** — every instance is registered against PLCSIM's persistent storage, so a
-  PLC's downloaded program survives a reboot or power cut. Combined with auto-start, a PLC comes back on
-  its own after a restart — nothing to re-open, nothing to re-download from TIA.
+  PLC's downloaded program survives a restart. Combined with auto-start, a PLC comes back on its own
+  after a reboot — nothing to re-open, nothing to re-download from TIA.
 
 Everything else (a power-on limit, per-PLC IP, network mode, freeze-loop safeguards) is there to make
 those features safe and convenient to run unattended.
@@ -32,15 +32,15 @@ those features safe and convenient to run unattended.
   on, RUN, STOP and power off — from this machine or any other machine that can reach it. Manage a
   headless simulation host without remoting into it.
 - **Automatic instance startup.** Bring one or more PLCs up by themselves at boot. Mode `last` restores
-  whatever was running before the last shutdown (so a reboot or power cut returns to where it was);
+  whatever was running before the last shutdown (so a reboot returns to where it was);
   mode `fixed` always starts a chosen PLC. The *service* always runs at startup; auto-starting an
   *instance* is a separate, optional toggle.
 
 **Supporting features**
 
 - **Persistent by default** — instances are always registered against PLCSIM's native persistent
-  storage (`storage_layout = default`), so a PLC's downloaded program survives reboots and power cuts;
-  download it from TIA Portal once and it's there after every restart.
+  storage (`storage_layout = default`), so a PLC's downloaded program survives restarts; download it
+  from TIA Portal once and it's there after every reboot.
 - **Power-on limit** (default **1**) with a separate, disk-only **hard safety cap**, so you never start
   more PLCs than the machine can actually handle.
 - **Per-PLC IP override**, re-applied on every power-on, so a PLC stays reachable on your subnet.
@@ -122,7 +122,7 @@ machine. The service always enforces `min(max_powered_on, hard_max_powered_on)`,
 in the UI can never push the machine past what it can handle.
 
 **Auto-start mode `last`.** Every power on/off records the set of running PLCs. At boot the service
-restores that set (capped to the limit). A hard power cut therefore comes back to where it was.
+restores that set (capped to the limit). A reboot therefore comes back to where it was.
 
 **Loop-breaker.** Before auto-starting, the service increments an on-disk attempt counter. It is reset
 to 0 only after the service stays healthy for a while — verified by repeated HTTP probes to its own

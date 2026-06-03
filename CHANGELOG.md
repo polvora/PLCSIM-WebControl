@@ -13,7 +13,7 @@ First public release.
 - **Instance auto-start** at boot, with two modes: `last` (restore whatever was running before
   the last shutdown) and `fixed` (always start one chosen instance).
 - **Persistent by default**: instances are registered against PLCSIM's native persistent storage, so a
-  PLC's downloaded program survives reboots and power cuts.
+  PLC's downloaded program survives restarts.
 - Configurable **power-on limit** with a separate, disk-only **hard safety cap** that the
   web UI can never exceed (protects machines that can only run a few instances at once).
 - **Boot protections** against a freeze/restart loop:
