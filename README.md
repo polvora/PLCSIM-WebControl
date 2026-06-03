@@ -64,30 +64,11 @@ That's it. To remove it later, run `.\scripts\uninstall.ps1` as administrator.
 
 ---
 
-## Build from source (for developers)
+## For developers
 
-The repo already ships a prebuilt `PlcWebControl.exe`, so you only need this after changing `src\`.
-No IDE required — it builds with the in-box .NET Framework compiler:
-
-```powershell
-.\scripts\build.ps1      # produces PlcWebControl.exe next to wwwroot\
-```
-
-To produce a release ZIP:
-
-```powershell
-.\scripts\package.ps1 -Version 1.0.0   # builds + zips into dist\
-```
-
-Repository layout:
-
-```
-src\PlcWebControl.cs        the whole backend (single file, .NET Framework, HttpListener)
-wwwroot\index.html          the web UI (vanilla JS, no build step)
-scripts\                    build / install / uninstall / autologon / package
-docs\                       INSTALL, CONFIGURATION, TROUBLESHOOTING
-appconfig.example.txt       configuration template
-```
+The prebuilt `PlcWebControl.exe` ships in the repo. Only if you change the backend
+(`src\PlcWebControl.cs`) or UI (`wwwroot\index.html`), rebuild with `.\scripts\build.ps1` — no IDE
+needed, just the in-box .NET Framework compiler.
 
 ---
 
