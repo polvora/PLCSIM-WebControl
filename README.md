@@ -47,8 +47,8 @@ Beyond remote control and auto-start:
 
 ## Quick start (no programming needed)
 
-1. **Download** the latest `PLCSIM-WebControl-x.y.z.zip` from the [Releases](../../releases) page and
-   extract it anywhere (e.g. `C:\PLCSIM-WebControl`).
+1. **Download** the project — green **Code** button → **Download ZIP** (the prebuilt
+   `PlcWebControl.exe` is included) — and extract it anywhere (e.g. `C:\PLCSIM-WebControl`).
 2. Open **PowerShell as administrator** in that folder and run:
    ```powershell
    .\scripts\install.ps1
@@ -66,7 +66,8 @@ That's it. To remove it later, run `.\scripts\uninstall.ps1` as administrator.
 
 ## Build from source (for developers)
 
-No IDE needed — it compiles with the in-box .NET Framework compiler:
+The repo already ships a prebuilt `PlcWebControl.exe`, so you only need this after changing `src\`.
+No IDE required — it builds with the in-box .NET Framework compiler:
 
 ```powershell
 .\scripts\build.ps1      # produces PlcWebControl.exe next to wwwroot\

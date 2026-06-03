@@ -1,5 +1,5 @@
-# Build output (rebuild with scripts\build.ps1)
-PlcWebControl.exe
+# The prebuilt PlcWebControl.exe IS committed so the repo download is ready to run.
+# Rebuild it locally with scripts\build.ps1 after changing src\.
 *.pdb
 
 # Runtime / machine-specific files (never commit)
