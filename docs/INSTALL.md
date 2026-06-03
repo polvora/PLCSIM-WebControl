@@ -8,12 +8,15 @@
 ## Install
 1. Download the project — green **Code → Download ZIP** — which gives **`PLCSIM-WebControl-main.zip`**
    (the prebuilt `PlcWebControl.exe` is inside). Extract it; you get a `PLCSIM-WebControl-main` folder.
-2. **PowerShell → Run as administrator**, `cd` into that folder, and run:
-   ```powershell
-   .\scripts\install.ps1
-   ```
-   It builds the app, finds the PLCSIM DLL, opens the LAN port (default), creates `appconfig.txt`, and
-   registers an always-on task **"PLCSIM WebControl"**. Add `-LocalOnly` to bind to localhost.
+2. **Double-click `Install.cmd`** and accept the UAC prompt. It finds the PLCSIM DLL, opens the LAN
+   port, creates `appconfig.txt`, and registers an always-on task **"PLCSIM WebControl"**.
+
+   > Because it was downloaded from the internet, Windows may first show a security warning ("Windows
+   > protected your PC" / "Open File - Security Warning"). Choose **More info → Run anyway** — it's
+   > your own downloaded file.
+
+   Command-line alternative: from an elevated PowerShell, run `.\scripts\install.ps1` (add `-LocalOnly`
+   to bind to localhost).
 3. Open **http://localhost:8090** (or `http://<this-machine-ip>:8090` from another machine).
 
 Manage it:

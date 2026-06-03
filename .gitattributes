@@ -1,10 +1,11 @@
 # Normalize line endings: store text as LF in the repo, check out native on each platform.
 * text=auto
 
-# Windows scripts are most predictable with CRLF in the working tree.
+# Windows scripts need CRLF. Mark .cmd/.bat as -text so the bytes are preserved verbatim
+# (incl. in the GitHub "Download ZIP" archive), since LF can break batch parenthesized blocks.
 *.ps1  text eol=crlf
-*.bat  text eol=crlf
-*.cmd  text eol=crlf
+*.bat  -text
+*.cmd  -text
 
 # Binaries (never normalize).
 *.exe  binary

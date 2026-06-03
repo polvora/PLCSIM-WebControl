@@ -19,6 +19,8 @@ New-Item -ItemType Directory -Force -Path $stage | Out-Null
 
 Copy-Item (Join-Path $root "PlcWebControl.exe")        $stage
 Copy-Item (Join-Path $root "appconfig.example.txt")    $stage
+Copy-Item (Join-Path $root "Install.cmd")              $stage -ErrorAction SilentlyContinue
+Copy-Item (Join-Path $root "Uninstall.cmd")            $stage -ErrorAction SilentlyContinue
 Copy-Item (Join-Path $root "README.md")                $stage -ErrorAction SilentlyContinue
 Copy-Item (Join-Path $root "LICENSE")                  $stage -ErrorAction SilentlyContinue
 Copy-Item (Join-Path $root "CHANGELOG.md")             $stage -ErrorAction SilentlyContinue

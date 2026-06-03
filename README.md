@@ -52,13 +52,11 @@ Beyond remote control and auto-start:
 1. **Download** the project — green **Code** button → **Download ZIP**. You get
    **`PLCSIM-WebControl-main.zip`** (the prebuilt `PlcWebControl.exe` is inside). Extract it anywhere;
    it produces a `PLCSIM-WebControl-main` folder.
-2. Open **PowerShell as administrator** in that folder and run:
-   ```powershell
-   .\scripts\install.ps1
-   ```
-   The installer builds the executable, detects your PLCSIM Advanced install, makes the UI reachable
-   from the LAN by default (no authentication; it opens the firewall for the port), and registers an
-   always-on Scheduled Task. Pass `-LocalOnly` to bind it to localhost instead.
+2. **Double-click `Install.cmd`** and accept the admin prompt (UAC). It sets everything up: detects
+   your PLCSIM Advanced install, makes the UI reachable from the LAN (no authentication; it opens the
+   firewall for the port), creates `appconfig.txt`, and registers an always-on Scheduled Task.
+   *(Command-line alternative: run `scripts\install.ps1` from an elevated PowerShell; add `-LocalOnly`
+   to bind to localhost.)*
 3. Open the UI:
    - on this machine: **http://localhost:8090**
    - from another machine: **http://&lt;this-machine-ip&gt;:8090**
