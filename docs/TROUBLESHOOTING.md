@@ -52,3 +52,17 @@ The limiter. Raise **Max powered on** in the UI (it can't exceed `hard_max_power
 ## Can't change a PLC's IP
 The PLC must be **powered on** first, then use the **IP…** button. The IP is re-applied on every
 power-on. If the TIA program defines its own IP, that applies too.
+
+## An instance powers off by itself after a while
+This tool never powers an instance off on its own (only your explicit **Power off** does — and it's
+logged). A simulation that powers off after some minutes is **PLCSIM Advanced** itself, typically the
+**trial / unlicensed** time limit. Check your S7-PLCSIM Advanced license (Automation License Manager);
+a valid license removes the limit.
+
+## Network mode looks like Softbus / "didn't persist"
+Your setting in `appconfig.txt` **does** persist across reboots. Two things to know:
+- The PLCSIM runtime reverts its live `NetworkMode` to Softbus when idle (no instances on). The tool
+  re-applies your configured mode at startup and before powering on an instance, so PLCs still come up
+  in the right mode.
+- A **fresh re-install** creates a new `appconfig.txt` (network defaults to Softbus), because the
+  config isn't shipped in the ZIP. Re-pick your network mode in the UI after a reinstall.

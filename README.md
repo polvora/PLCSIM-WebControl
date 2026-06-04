@@ -27,8 +27,8 @@ usual; PLCSIM-WebControl reads that workspace and adds what the GUI doesn't give
 
 Beyond remote control and auto-start:
 
-- **Power-on limit** (default **1**) with a separate, disk-only **hard safety cap**, so you never start
-  more PLCs than the machine can actually handle.
+- **Power-on limit** (default **1**, freely adjustable in the UI to test capacity) plus a disk-only
+  **hard cap** that bounds the **auto-start** count — the freeze protection for unattended reboots.
 - **Per-PLC IP override**, re-applied on every power-on, so a PLC stays reachable on your subnet.
 - **Network mode**: Softbus (zero-config) or TCP/IP mapped to a host adapter.
 - **Installs as a Windows Service** you Start/Stop from `services.msc` / Task Manager. (Because PLCSIM
@@ -83,9 +83,11 @@ needed, just the in-box .NET Framework compiler.
 Auto-start runs with no one watching, so a few guardrails stop a bad setup from looping. They run in
 the background; you normally never see them.
 
-**Power-on limit + hard cap.** `max_powered_on` (UI-editable) is the operational limit;
-`hard_max_powered_on` (disk-only) is the machine's real capacity. The service enforces the smaller of
-the two, so the UI can't push the machine past what it can handle.
+**Power-on limit + hard cap.** `max_powered_on` (UI-editable) is the operational limit for *manual*
+power-ons — it is **not** capped by the hard cap, so you can raise it to discover how many PLCs your
+machine really handles. `hard_max_powered_on` (disk-only) limits only the **auto-start** count: after
+an unattended reboot, auto-start restores at most that many — so even if a manual test froze the box,
+the next boot stays within the safe number.
 
 **Loop-breaker.** A counter is bumped before each auto-start and reset only after the service passes
 repeated `/health` probes for a while — so a *soft freeze* (alive but unresponsive) won't clear it.

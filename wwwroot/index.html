@@ -125,13 +125,15 @@
       <select id="netMode">
         <option value="Softbus">PLCSIM (Softbus) — default, no adapter</option>
         <option value="TCPIPMultipleAdapter">TCP/IP Multiple Adapter</option>
-        <option value="TCPIPSingleAdapter">TCP/IP Single Adapter</option>
+        <option value="TCPIPSingleAdapter">TCP/IP Single Adapter — no adapter choice</option>
       </select>
-      <label class="sub">Adapter:</label>
-      <select id="netAdapter" style="min-width:280px"></select>
+      <span id="adapterWrap" style="display:inline-flex;align-items:center;gap:12px">
+        <label class="sub">Adapter:</label>
+        <select id="netAdapter" style="min-width:280px"></select>
+      </span>
       <button class="primary" id="netSave">Apply</button>
     </div>
-    <div class="note" id="netNote">Softbus works out of the box. Choose a TCP/IP mode + a host adapter only if you need real Ethernet communication with the PLCs.</div>
+    <div class="note" id="netNote">Softbus needs no setup. Pick a host <b>adapter</b> only in <b>TCP/IP Multiple Adapter</b> mode (the only mode that maps PLCs to a specific NIC); Softbus and Single Adapter don't use it.</div>
   </div>
 
   <div class="card">
@@ -213,7 +215,7 @@ function renderControls(){
   else sb.style.display='none';
 
   // limit (the web UI never exceeds the hard safety cap)
-  const mo=$('#maxOn'); mo.max=hard; if(document.activeElement!==mo) mo.value = max;
+  const mo=$('#maxOn'); if(document.activeElement!==mo) mo.value = max;
   $('#limitNote').innerHTML = (max===1
     ? 'Rule: only <b>one PLC powered on</b> at a time. Powering on another is <b>blocked</b> — power the active one off first.'
     : `Rule: at most <b>${max} PLCs powered on</b> at a time. Once the limit is reached, powering on another is <b>blocked</b> until you power one off.`);
@@ -233,11 +235,12 @@ function renderControls(){
   $('#asNote').innerHTML = (mode==='fixed')
     ? 'At server startup it will always start the selected fixed instance.'
     : ('At server startup it will restore <b>whatever was powered on</b> last time'+(last.length?': <b>'+last.join(', ')+'</b>':' (right now: none)')+'.');
-  $('#hardNote').innerHTML = `🛡️ Safety cap for this machine: <b>${hard} PLCs powered on</b> (set on disk, not editable here). The operational limit above never exceeds it. Do not raise the load beyond this number or the machine may <b>freeze</b>.`;
+  $('#hardNote').innerHTML = `🛡️ Auto-start safety cap: <b>${hard} PLCs</b> (set on disk, not editable here). On an unattended reboot, auto-start brings up <b>at most ${hard}</b> — that's the freeze protection. The operational limit above is <b>not</b> capped by it, so you can raise it to test how many your machine really handles (if it freezes, the next reboot still respects the safety cap).`;
   if(document.activeElement!==$('#suppressNext')) $('#suppressNext').checked = !!S.suppressNextBoot;
 
   // network
   if(document.activeElement!==$('#netMode')) $('#netMode').value = S.network.mode;
+  $('#adapterWrap').style.display = (S.network.mode==='TCPIPMultipleAdapter') ? 'inline-flex' : 'none';
 }
 
 async function loadAdapters(){
@@ -265,6 +268,7 @@ $('#asMode').onchange = () => { $('#asInstance').style.display = ($('#asMode').v
 $('#maxSave').onclick = async () => { const r=await api('limit',{max:Number($('#maxOn').value)||1}); toast(r.message,r.ok); await load(); };
 $('#safeClear').onclick = async () => { const r=await api('clear-safemode',{}); toast(r.message,r.ok); await load(); };
 $('#suppressNext').onchange = async e => { const r=await api('safemode',{enabled:e.target.checked}); toast(r.message,r.ok); await load(); };
+$('#netMode').onchange = () => { $('#adapterWrap').style.display = ($('#netMode').value==='TCPIPMultipleAdapter') ? 'inline-flex' : 'none'; };
 $('#netSave').onclick = async () => {
   const opt=$('#netAdapter').selectedOptions[0];
   const r=await api('network',{mode:$('#netMode').value, adapterIndex:Number($('#netAdapter').value), adapterName:opt?opt.dataset.name:''});

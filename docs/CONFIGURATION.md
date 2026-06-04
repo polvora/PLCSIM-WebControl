@@ -29,8 +29,8 @@ only while the service is **stopped**. Start from `appconfig.example.txt`.
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `max_powered_on` | `1` | Operational limit of how many PLCs may be powered on at once. Editable from the UI. |
-| `hard_max_powered_on` | `4` | **Hard safety cap = the real capacity of this machine.** Editable on disk **only**; the UI can never exceed it. The effective limit is `min(max_powered_on, hard_max_powered_on)`. Set this to how many PLCs your machine can run without freezing. |
+| `max_powered_on` | `1` | Operational limit for **manual** power-ons, editable from the UI. **Not** capped by the hard cap — raise it to test how many PLCs the machine handles. |
+| `hard_max_powered_on` | `4` | Safety cap for **auto-start only** (disk-only, not editable from the UI). After an unattended reboot, auto-start restores at most this many — so a manual test that froze the box still reboots safely. Set it to a number the machine can definitely run unattended. |
 
 ## Boot protections
 
@@ -47,9 +47,9 @@ only while the service is **stopped**. Start from `appconfig.example.txt`.
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `network_mode` | `Softbus` | `Softbus` = zero-config simulation bus. `TCPIPSingleAdapter` / `TCPIPMultipleAdapter` = real Ethernet via a host adapter. |
-| `adapter_index` | `0` | Host adapter `ifIndex` (only for TCP/IP modes). Pick it from the UI's adapter list. |
-| `adapter_name` | (empty) | Friendly name of that adapter (informational). |
+| `network_mode` | `Softbus` | `Softbus` = zero-config simulation bus (no adapter). `TCPIPSingleAdapter` = real Ethernet over the host's stack, no adapter selection. `TCPIPMultipleAdapter` = real Ethernet via the PLCSIM virtual switch bound to a chosen host adapter. |
+| `adapter_index` | `0` | Host adapter `ifIndex`. **Used only in `TCPIPMultipleAdapter` mode** (Softbus and Single Adapter ignore it). Pick it from the UI's adapter list, which only appears in that mode. |
+| `adapter_name` | (empty) | Friendly name of that adapter (informational; Multiple Adapter only). |
 
 ## Advanced
 

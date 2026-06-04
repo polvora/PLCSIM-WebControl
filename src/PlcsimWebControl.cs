@@ -124,7 +124,7 @@ internal static class Program
                     {
                         int next = attempts + 1;
                         BootGuard.WriteAttempts(exeDir, next); // record the attempt BEFORE powering on (survives a freeze)
-                        Log.Write("Auto-start (mode " + _cfg.AutostartMode + ", effective cap " + _cfg.EffectiveMax() + ", attempt " + next + "/" + _cfg.BootFailLimit + "). Staggered: " + string.Join(", ", targets.ToArray()));
+                        Log.Write("Auto-start (mode " + _cfg.AutostartMode + ", safety cap " + _cfg.HardMaxPoweredOn + ", attempt " + next + "/" + _cfg.BootFailLimit + "). Staggered: " + string.Join(", ", targets.ToArray()));
                         ThreadPool.QueueUserWorkItem(_ => _plc.RunStaggeredAutostart(targets, exeDir));
                     }
                     else
@@ -241,10 +241,9 @@ internal sealed class Config
     public string LogFile;
     public Dictionary<string, string> DesiredIp = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase); // name -> "ip,mask,gw"
 
-    // Effective cap: never exceeds the hard safety cap, even if the web asks for more.
-    public int EffectiveMax() { return MaxPoweredOn < HardMaxPoweredOn ? MaxPoweredOn : HardMaxPoweredOn; }
-
-    public bool IsTcpIp() { return NetworkMode.StartsWith("TCPIP", StringComparison.OrdinalIgnoreCase); }
+    // Adapter binding/mapping applies ONLY to TCP/IP Multiple Adapter (the PLCSIM virtual switch).
+    // Softbus and TCP/IP Single Adapter do not select a host adapter.
+    public bool UsesAdapter() { return string.Equals(NetworkMode, "TCPIPMultipleAdapter", StringComparison.OrdinalIgnoreCase); }
 
     // Loopback URL to our own web server, for the self health probe (port derived from http_prefix).
     public string SelfHealthUrl()
@@ -285,7 +284,8 @@ internal sealed class Config
         if (c.MaxPoweredOn < 1) c.MaxPoweredOn = 1;
         int hmx = c.HardMaxPoweredOn; if (map.ContainsKey("hard_max_powered_on") && int.TryParse(map["hard_max_powered_on"], out hmx)) c.HardMaxPoweredOn = hmx;
         if (c.HardMaxPoweredOn < 1) c.HardMaxPoweredOn = 1;
-        if (c.MaxPoweredOn > c.HardMaxPoweredOn) c.MaxPoweredOn = c.HardMaxPoweredOn;
+        // max_powered_on is NOT clamped to the hard cap: the user can raise the operational limit to
+        // test how many PLCs the machine handles. The hard cap only limits the AUTOSTART target count.
         int bfl = c.BootFailLimit; if (map.ContainsKey("boot_fail_limit") && int.TryParse(map["boot_fail_limit"], out bfl)) c.BootFailLimit = bfl;
         if (c.BootFailLimit < 1) c.BootFailLimit = 1;
         int ss = c.StableSeconds; if (map.ContainsKey("stable_seconds") && int.TryParse(map["stable_seconds"], out ss)) c.StableSeconds = ss;
@@ -564,7 +564,7 @@ internal sealed class PlcManager
             mgr.NetworkMode = desired;
         }
         // Adapter binding only applies to TCP/IP modes; Softbus needs no host adapter.
-        if (!_cfg.IsTcpIp()) return;
+        if (!_cfg.UsesAdapter()) return;
         bool alreadyBound = mgr.NetInterfaces.Any(n => n.interfaceIndex == _cfg.AdapterIndex && n.vSwitchBindingEnabled);
         if (!alreadyBound)
         {
@@ -589,7 +589,7 @@ internal sealed class PlcManager
 
     private void MapInstanceToAdapter(IInstance inst)
     {
-        if (!_cfg.IsTcpIp()) return;   // Softbus does not use a host adapter mapping
+        if (!_cfg.UsesAdapter()) return;   // Softbus does not use a host adapter mapping
         try { inst.SetNetInterfaceMapping(EPLCInterface.IE1, _cfg.AdapterIndex); Log.Write("  mapped IE1 -> adapter idx " + _cfg.AdapterIndex); }
         catch (Exception ex) { Log.Write("  WARN map IE1: " + ex.Message); }
     }
@@ -674,8 +674,10 @@ internal sealed class PlcManager
             foreach (var n in _cfg.LastRunning)
                 if (!string.IsNullOrEmpty(n) && !list.Contains(n)) list.Add(n);
         }
-        int eff = _cfg.EffectiveMax();
-        if (list.Count > eff) list = list.GetRange(0, eff);
+        // Auto-start is capped by the HARD safety cap (the unattended-boot protection), not the
+        // UI-editable operational limit. This is what stops a freeze loop after an unattended reboot.
+        int cap = _cfg.HardMaxPoweredOn;
+        if (list.Count > cap) list = list.GetRange(0, cap);
         return list;
     }
 
@@ -756,19 +758,23 @@ internal sealed class PlcManager
             if (!RuntimeAvailable()) return ActionResult.Bad("Runtime manager not available.");
             try
             {
-                // Instance limiter, enforced in the BACKEND (not just the UI): a power-on is allowed only
-                // if the total number of powered-on instances would not exceed the effective cap.
-                // It does NOT power off others automatically; it refuses with a clear message.
+                // Operational limiter, enforced in the BACKEND (not just the UI): a power-on is allowed
+                // only if the total number of powered-on instances would not exceed max_powered_on.
+                // This is the UI-editable limit (NOT the hard safety cap) so the user can test how many
+                // their machine handles. It does NOT power off others; it refuses with a clear message.
                 var on = PoweredOnNames();
                 bool nameAlreadyOn = on.Any(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase));
                 var others = on.Where(n => !string.Equals(n, name, StringComparison.OrdinalIgnoreCase)).ToList();
-                if (!nameAlreadyOn && others.Count >= _cfg.EffectiveMax())
+                if (!nameAlreadyOn && others.Count >= _cfg.MaxPoweredOn)
                 {
-                    int eff = _cfg.EffectiveMax();
-                    string lim = eff == 1 ? "only one PLC powered on at a time" : ("at most " + eff + " PLCs powered on at a time");
+                    string lim = _cfg.MaxPoweredOn == 1 ? "only one PLC powered on at a time" : ("at most " + _cfg.MaxPoweredOn + " PLCs powered on at a time");
                     return ActionResult.Bad("Cannot power on '" + name + "': " + others.Count +
                         " already powered on (" + string.Join(", ", others.ToArray()) + "). Power one off first (" + lim + ").");
                 }
+
+                // PLCSIM reverts the runtime NetworkMode to Softbus when idle. If nothing is running yet,
+                // re-apply the configured mode so this instance comes up reachable in the right mode.
+                if (on.Count == 0) { try { ApplyGlobalNetwork(); } catch (Exception ex) { Log.Write("  WARN re-apply network: " + ex.Message); } }
 
                 var inst = GetOrRegister(name);
                 MapInstanceToAdapter(inst);
@@ -948,7 +954,6 @@ internal sealed class WebServer
                     { "poweredOnList", _plc.PoweredOnList() },
                     { "maxPoweredOn", _cfg.MaxPoweredOn },
                     { "hardMaxPoweredOn", _cfg.HardMaxPoweredOn },
-                    { "effectiveMax", _cfg.EffectiveMax() },
                     { "safeMode", _plc.SafeMode },
                     { "safeModeReason", _plc.SafeModeReason },
                     { "suppressNextBoot", BootGuard.FlagPresent(_exeDir) },
@@ -999,12 +1004,10 @@ internal sealed class WebServer
                     if (body != null && body.ContainsKey("max")) { try { newMax = Convert.ToInt32(body["max"]); } catch { } }
                     else if (!string.IsNullOrEmpty(q["max"])) int.TryParse(q["max"], out newMax);
                     if (newMax < 1) newMax = 1;
-                    bool clamped = newMax > _cfg.HardMaxPoweredOn;
-                    if (clamped) newMax = _cfg.HardMaxPoweredOn;   // never exceeds the hard safety cap
-                    _cfg.MaxPoweredOn = newMax; _cfg.Save();
+                    _cfg.MaxPoweredOn = newMax; _cfg.Save();   // NOT clamped to the hard cap (lets the user test)
                     string msg = "operational power-on limit = " + newMax;
-                    if (clamped) msg += " (clamped to the safety cap " + _cfg.HardMaxPoweredOn + ")";
-                    WriteResult(ctx, clamped ? ActionResult.Bad(msg) : ActionResult.Good(msg));
+                    if (newMax > _cfg.HardMaxPoweredOn) msg += " (above the autostart safety cap " + _cfg.HardMaxPoweredOn + " - fine for manual testing; auto-start still restores at most " + _cfg.HardMaxPoweredOn + ")";
+                    WriteResult(ctx, ActionResult.Good(msg));
                     return;
                 }
             case "safemode":
@@ -1035,7 +1038,7 @@ internal sealed class WebServer
                         if (body.ContainsKey("adapterName")) _cfg.AdapterName = Convert.ToString(body["adapterName"]);
                     }
                     _cfg.Save();
-                    try { _plc.ApplyGlobalNetwork(); WriteResult(ctx, ActionResult.Good("network -> " + _cfg.NetworkMode + (_cfg.IsTcpIp() ? " / " + _cfg.AdapterName : ""))); }
+                    try { _plc.ApplyGlobalNetwork(); WriteResult(ctx, ActionResult.Good("network -> " + _cfg.NetworkMode + (_cfg.UsesAdapter() ? " / " + _cfg.AdapterName : ""))); }
                     catch (Exception ex) { WriteResult(ctx, ActionResult.Bad("saved, but applying failed: " + ex.Message)); }
                     return;
                 }
