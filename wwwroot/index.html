@@ -93,8 +93,7 @@
       <h2 style="margin:0">Workspace PLCs</h2>
       <div class="row">
         <label class="sub">Max powered on at once:</label>
-        <input id="maxOn" type="number" min="1" max="20" style="width:60px">
-        <button id="maxSave">Apply</button>
+        <input id="maxOn" type="number" min="1" max="20" style="width:60px" title="Saves automatically when you change it">
       </div>
     </div>
     <div class="note warn" id="limitNote" style="margin-top:10px"></div>
@@ -299,7 +298,6 @@ $('#asMode').onchange = () => { $('#asInstance').style.display = ($('#asMode').v
 // operational limit: save on commit (blur/Enter) so the 3s refresh never reverts an edit
 async function saveMax(){ const r=await api('limit',{max:Number($('#maxOn').value)||1}); toast(r.message,r.ok); await load(); }
 $('#maxOn').onchange = saveMax;
-$('#maxSave').onclick = saveMax;
 
 // auto-start cap: only via the warning modal (not edited inline)
 $('#hardChange').onclick = () => { $('#hardModalInput').value = (S&&S.hardMaxPoweredOn)||1; $('#modalBg').classList.add('show'); $('#hardModalInput').focus(); };
