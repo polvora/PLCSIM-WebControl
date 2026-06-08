@@ -1,4 +1,4 @@
-# PLCSIM-WebControl configuration template.
+# PLCSIM-AutoStart configuration template.
 # The installer copies this to appconfig.txt next to the executable.
 # The service rewrites appconfig.txt when you change settings from the web UI,
 # so edit it manually only while the service is STOPPED.
@@ -60,5 +60,5 @@ run_timeout = 60000
 connect_wait_seconds = 120
 # Explicit path to Siemens.Simatic.Simulation.Runtime.Api.x64.dll. Blank = auto-detect the installed PLCSIM Advanced.
 api_dll_path =
-# Log file path. Blank = webcontrol.log next to the executable.
+# Log file path. Blank = autostart.log next to the executable.
 log =

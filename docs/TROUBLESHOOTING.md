@@ -2,7 +2,7 @@
 
 Check the log first:
 ```powershell
-Get-Content .\webcontrol.log -Tail 40 -Wait
+Get-Content .\autostart.log -Tail 40 -Wait
 ```
 
 ## "runtime OFF" / runtime manager not reachable
@@ -34,12 +34,12 @@ netsh http add urlacl url=http://+:8090/ user="DOMAIN\User"
 ```
 
 ## Rebuild fails: `CS0016 ... being used by another process`
-The running app locks `PlcsimWebControl.exe`. Stop it first (elevated):
+The running app locks `PlcsimAutoStart.exe`. Stop it first (elevated):
 ```powershell
-Stop-Service "PLCSIM WebControl"            # or: Stop-ScheduledTask -TaskName "PLCSIM WebControl"
-Get-Process PlcsimWebControl | Stop-Process -Force
+Stop-Service "PLCSIM AutoStart"            # or: Stop-ScheduledTask -TaskName "PLCSIM AutoStart"
+Get-Process PlcsimAutoStart | Stop-Process -Force
 .\scripts\build.ps1
-Start-Service "PLCSIM WebControl"           # or: Start-ScheduledTask -TaskName "PLCSIM WebControl"
+Start-Service "PLCSIM AutoStart"           # or: Start-ScheduledTask -TaskName "PLCSIM AutoStart"
 ```
 
 ## Red "SAFE MODE" banner

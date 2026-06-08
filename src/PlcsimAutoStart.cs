@@ -1,9 +1,9 @@
-// PlcsimWebControl.cs
+// PlcsimAutoStart.cs
 // Always-on local web service to control Siemens S7-PLCSIM Advanced virtual PLCs from a browser.
 //
 // Run modes:
-//   PlcsimWebControl.exe              -> runs the web app (must be an interactive session).
-//   PlcsimWebControl.exe --service    -> runs as a Windows Service (LocalSystem) that LAUNCHES the
+//   PlcsimAutoStart.exe              -> runs the web app (must be an interactive session).
+//   PlcsimAutoStart.exe --service    -> runs as a Windows Service (LocalSystem) that LAUNCHES the
 //                                        web app in the active interactive session (PLCSIM needs one).
 //
 // Features:
@@ -76,7 +76,7 @@ internal static class Program
         _cfg = Config.Load(Path.Combine(exeDir, "appconfig.txt"), exeDir);
         Log.File = _cfg.LogFile;
         Log.Write("==================================================================");
-        Log.Write("PLCSIM-WebControl starting. workspace='" + _cfg.Workspace + "' prefix='" + _cfg.HttpPrefix + "'");
+        Log.Write("PLCSIM-AutoStart starting. workspace='" + _cfg.Workspace + "' prefix='" + _cfg.HttpPrefix + "'");
         Log.Write("PLCSIM Advanced API DLL: " + (string.IsNullOrEmpty(_apiDllPath) ? "NOT FOUND (set api_dll_path in appconfig.txt)" : _apiDllPath));
 
         _plc = new PlcManager(_cfg);
@@ -261,7 +261,7 @@ internal sealed class Config
         var c = new Config { Path = path, ExeDir = exeDir };
         string docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         c.WorkspaceRoot = System.IO.Path.Combine(docs, "PLCSIM");
-        c.LogFile = System.IO.Path.Combine(exeDir, "webcontrol.log");
+        c.LogFile = System.IO.Path.Combine(exeDir, "autostart.log");
 
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         if (File.Exists(path))
@@ -324,7 +324,7 @@ internal sealed class Config
     public void Save()
     {
         var sb = new StringBuilder();
-        sb.AppendLine("# PLCSIM-WebControl config (auto-written; edit while the service is stopped).");
+        sb.AppendLine("# PLCSIM-AutoStart config (auto-written; edit while the service is stopped).");
         sb.AppendLine("# See docs/CONFIGURATION.md for the meaning of every key.");
         sb.AppendLine("http_prefix = " + HttpPrefix);
         sb.AppendLine("workspace_root = " + WorkspaceRoot);
@@ -1114,7 +1114,7 @@ internal sealed class PlcService : ServiceBase
     public PlcService(string exeDir)
     {
         _exeDir = exeDir;
-        ServiceName = "PLCSIM WebControl";
+        ServiceName = "PLCSIM AutoStart";
         CanStop = true;
         CanShutdown = true;
     }
@@ -1131,7 +1131,7 @@ internal sealed class PlcService : ServiceBase
 
     private void Run()
     {
-        string exe = Path.Combine(_exeDir, "PlcsimWebControl.exe");
+        string exe = Path.Combine(_exeDir, "PlcsimAutoStart.exe");
         bool warnedNoSession = false;
         while (!_stopping)
         {

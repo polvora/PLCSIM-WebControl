@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 $root  = Split-Path -Parent $PSScriptRoot
 $dist  = Join-Path $root "dist"
-$stage = Join-Path $dist "PLCSIM-WebControl-$Version"
+$stage = Join-Path $dist "PLCSIM-AutoStart-$Version"
 
 # 1) Build the executable against the local Siemens API DLL.
 & (Join-Path $PSScriptRoot "build.ps1")
@@ -17,7 +17,7 @@ $stage = Join-Path $dist "PLCSIM-WebControl-$Version"
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 
-Copy-Item (Join-Path $root "PlcsimWebControl.exe")        $stage
+Copy-Item (Join-Path $root "PlcsimAutoStart.exe")        $stage
 Copy-Item (Join-Path $root "appconfig.example.txt")    $stage
 Copy-Item (Join-Path $root "Install.cmd")              $stage -ErrorAction SilentlyContinue
 Copy-Item (Join-Path $root "Uninstall.cmd")            $stage -ErrorAction SilentlyContinue
@@ -29,7 +29,7 @@ Copy-Item (Join-Path $root "scripts")  (Join-Path $stage "scripts")  -Recurse
 Copy-Item (Join-Path $root "docs")     (Join-Path $stage "docs")     -Recurse
 
 # 3) Zip it.
-$zip = Join-Path $dist "PLCSIM-WebControl-$Version.zip"
+$zip = Join-Path $dist "PLCSIM-AutoStart-$Version.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path "$stage\*" -DestinationPath $zip -Force
 

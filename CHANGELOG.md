@@ -30,4 +30,4 @@ First public release.
 - Installs by default as a **Windows Service** (manageable from `services.msc` / Task Manager). Because
   PLCSIM can't run from session 0, the service is a launcher that starts the web app in the logged-in
   interactive session with the user's elevated token. `-AsTask` installs a Scheduled Task instead.
-- The executable is named **`PlcsimWebControl.exe`** (matching the project name).
+- The executable is named **`PlcsimAutoStart.exe`** (matching the project name).

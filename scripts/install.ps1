@@ -1,4 +1,4 @@
-# install.ps1 - Guided installer for PLCSIM-WebControl.
+# install.ps1 - Guided installer for PLCSIM-AutoStart.
 #
 # RUN THIS IN AN ELEVATED POWERSHELL (Run as administrator).
 #
@@ -18,12 +18,12 @@ param(
     [int]$Port = 8090,
     [switch]$LocalOnly,
     [switch]$AsTask,
-    [string]$TaskName = "PLCSIM WebControl"
+    [string]$TaskName = "PLCSIM AutoStart"
 )
 
 $ErrorActionPreference = "Stop"
 $root    = Split-Path -Parent $PSScriptRoot
-$exe     = Join-Path $root "PlcsimWebControl.exe"
+$exe     = Join-Path $root "PlcsimAutoStart.exe"
 $cfg     = Join-Path $root "appconfig.txt"
 $example = Join-Path $root "appconfig.example.txt"
 
@@ -35,13 +35,13 @@ function Assert-Admin {
 }
 Assert-Admin
 
-Write-Host "==== PLCSIM-WebControl installer ====" -ForegroundColor Cyan
+Write-Host "==== PLCSIM-AutoStart installer ====" -ForegroundColor Cyan
 if ($AsTask) { Write-Host "Install method: Scheduled Task (-AsTask)." }
 else { Write-Host "Install method: Windows Service - manage it later from services.msc / Task Manager > Services." }
 
 # 1) Build the executable if it is missing.
 if (-not (Test-Path $exe)) {
-    Write-Host "PlcsimWebControl.exe not found - building it now..."
+    Write-Host "PlcsimAutoStart.exe not found - building it now..."
     & (Join-Path $PSScriptRoot "build.ps1")
 }
 
@@ -108,13 +108,21 @@ if ($svcExisting) {
     & sc.exe delete "$TaskName" | Out-Null; Start-Sleep 1
 }
 Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
+Get-Process PlcsimAutoStart -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
+# Legacy cleanup: remove the pre-rename "PLCSIM WebControl" service/task + old binary, if upgrading.
+$legacy = "PLCSIM WebControl"
+$lsvc = Get-Service -Name $legacy -ErrorAction SilentlyContinue
+if ($lsvc) { Stop-Service -Name $legacy -Force -ErrorAction SilentlyContinue; & sc.exe delete "$legacy" | Out-Null }
+Unregister-ScheduledTask -TaskName $legacy -Confirm:$false -ErrorAction SilentlyContinue
 Get-Process PlcsimWebControl -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-NetFirewallRule -DisplayName "$legacy $Port" -ErrorAction SilentlyContinue | Remove-NetFirewallRule -ErrorAction SilentlyContinue
 
 if (-not $AsTask) {
     # Windows Service (launcher): shows in services.msc / Task Manager; runs as LocalSystem and starts
     # the web app in the interactive session so PLCSIM works.
     New-Service -Name $TaskName -BinaryPathName "`"$exe`" --service" -DisplayName $TaskName `
-        -Description "PLCSIM-WebControl: launches the web app in the interactive session." `
+        -Description "PLCSIM-AutoStart: launches the web app in the interactive session." `
         -StartupType Automatic | Out-Null
     & sc.exe failure "$TaskName" reset= 0 actions= restart/60000 | Out-Null
     $installedAs = "service"
@@ -140,8 +148,8 @@ if ($Lan) {
     $ip = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' } | Select-Object -First 1).IPAddress
     if ($ip) { Write-Host "LAN URL:    http://${ip}:$Port" -ForegroundColor Cyan }
 }
-if (-not $AsTask) { Write-Host "Logs:       $root\webcontrol.log   (service log: $root\service.log)" }
-else { Write-Host "Logs:       $root\webcontrol.log" }
+if (-not $AsTask) { Write-Host "Logs:       $root\autostart.log   (service log: $root\service.log)" }
+else { Write-Host "Logs:       $root\autostart.log" }
 
 # 7) Auto-logon for unattended boot (a core feature: PLCSIM only runs while a user is logged in).
 Write-Host ""
@@ -163,5 +171,5 @@ if ($startNow -ne "n") {
     if ($installedAs -eq "service") { Start-Service -Name $TaskName } else { Start-ScheduledTask -TaskName $TaskName }
     Write-Host "Starting... (the web app takes a few seconds to come up)"
     Start-Sleep 6
-    if (Test-Path "$root\webcontrol.log") { Write-Host "Recent app log:"; Get-Content "$root\webcontrol.log" -Tail 8 }
+    if (Test-Path "$root\autostart.log") { Write-Host "Recent app log:"; Get-Content "$root\autostart.log" -Tail 8 }
 }

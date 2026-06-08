@@ -6,10 +6,10 @@
 - .NET Framework 4.x (already on modern Windows)
 
 ## Install
-1. Download the project — green **Code → Download ZIP** — which gives **`PLCSIM-WebControl-main.zip`**
-   (the prebuilt `PlcsimWebControl.exe` is inside). Extract it; you get a `PLCSIM-WebControl-main` folder.
+1. Download the project — green **Code → Download ZIP** — which gives **`PLCSIM-AutoStart-main.zip`**
+   (the prebuilt `PlcsimAutoStart.exe` is inside). Extract it; you get a `PLCSIM-AutoStart-main` folder.
 2. **Double-click `Install.cmd`** and accept the UAC prompt. It finds the PLCSIM DLL, opens the LAN
-   port, creates `appconfig.txt`, and installs the **Windows Service "PLCSIM WebControl"** (you can
+   port, creates `appconfig.txt`, and installs the **Windows Service "PLCSIM AutoStart"** (you can
    Start/Stop it from `services.msc` / Task Manager). Add `-AsTask` to install a Scheduled Task instead.
 
    > Because it was downloaded from the internet, Windows may first show a security warning ("Windows
@@ -22,9 +22,9 @@
 
 Manage it (or use `services.msc` / Task Manager → Services):
 ```powershell
-Start-Service "PLCSIM WebControl"
-Stop-Service  "PLCSIM WebControl"
-Get-Content .\webcontrol.log -Tail 30 -Wait
+Start-Service "PLCSIM AutoStart"
+Stop-Service  "PLCSIM AutoStart"
+Get-Content .\autostart.log -Tail 30 -Wait
 ```
 
 ## How the service works (the session-0 catch)

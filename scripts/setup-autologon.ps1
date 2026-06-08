@@ -1,4 +1,4 @@
-# setup-autologon.ps1 - OPTIONAL helper to enable Windows auto-logon, so the PLCSIM-WebControl
+# setup-autologon.ps1 - OPTIONAL helper to enable Windows auto-logon, so the PLCSIM-AutoStart
 # service starts unattended after a reboot (PLCSIM Advanced needs a logged-in Windows session).
 #
 # RUN THIS IN AN ELEVATED POWERSHELL (Run as administrator).
@@ -66,4 +66,4 @@ if ($auto) {
 
 $plain = $null
 Write-Host ""
-Write-Host "Reboot to verify the machine logs on automatically and the PLCSIM WebControl task starts."
+Write-Host "Reboot to verify the machine logs on automatically and the PLCSIM AutoStart task starts."

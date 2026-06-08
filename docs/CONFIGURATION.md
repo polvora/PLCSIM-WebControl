@@ -1,6 +1,6 @@
 # Configuration reference
 
-Settings live in `appconfig.txt` next to `PlcsimWebControl.exe` (`key = value`; `#`/`;` = comment; blank =
+Settings live in `appconfig.txt` next to `PlcsimAutoStart.exe` (`key = value`; `#`/`;` = comment; blank =
 built-in default). The service rewrites this file when you change settings in the UI, so edit it by hand
 only while the service is **stopped**. Start from `appconfig.example.txt`.
 
@@ -60,5 +60,5 @@ only while the service is **stopped**. Start from `appconfig.example.txt`.
 | `run_timeout` | `60000` | RUN/STOP timeout (ms). |
 | `connect_wait_seconds` | `120` | How long to wait for the PLCSIM runtime manager at startup. |
 | `api_dll_path` | auto | Explicit path to `Siemens.Simatic.Simulation.Runtime.Api.x64.dll`. Blank = auto-detect the installed PLCSIM Advanced. Can also be set via the `PLCSIM_API_DLL` environment variable. |
-| `log` | `webcontrol.log` (next to the exe) | Log file path. |
+| `log` | `autostart.log` (next to the exe) | Log file path. |
 | `ip.<InstanceName>` | (none) | Saved IP override for a PLC, format `ip,mask,gateway`, re-applied on every power-on. Created when you set an IP from the UI. |

@@ -1,5 +1,5 @@
 @echo off
-title PLCSIM-WebControl installer
+title PLCSIM-AutoStart installer
 rem Double-click this file to install. It requests administrator rights automatically (UAC),
 rem then runs scripts\install.ps1. No need to open PowerShell or navigate anywhere.
 

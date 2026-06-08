@@ -1,10 +1,10 @@
-# The prebuilt PlcsimWebControl.exe IS committed so the repo download is ready to run.
+# The prebuilt PlcsimAutoStart.exe IS committed so the repo download is ready to run.
 # Rebuild it locally with scripts\build.ps1 after changing src\.
 *.pdb
 
 # Runtime / machine-specific files (never commit)
 appconfig.txt
-webcontrol.log
+autostart.log
 boot-state.txt
 SAFEMODE
 

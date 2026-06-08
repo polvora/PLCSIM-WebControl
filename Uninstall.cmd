@@ -1,5 +1,5 @@
 @echo off
-title PLCSIM-WebControl uninstaller
+title PLCSIM-AutoStart uninstaller
 rem Double-click this file to uninstall. It requests administrator rights automatically (UAC),
 rem then runs scripts\uninstall.ps1. Your config, logs and PLCSIM workspaces are left untouched.
 

@@ -1,18 +1,18 @@
-# PLCSIM-WebControl
+# PLCSIM Auto-Start
 
-**Remote web control and automatic startup for Siemens S7-PLCSIM Advanced virtual PLCs.**
+**Automatic startup (and remote web control) for Siemens S7-PLCSIM Advanced virtual PLCs.**
 
-![PLCSIM-WebControl web interface](docs/ui.png)
+![PLCSIM Auto-Start web interface](docs/ui.png)
 
-PLCSIM-WebControl is a small always-on web app that **extends** S7-PLCSIM Advanced — it does **not**
+PLCSIM Auto-Start is a small always-on web app that **extends** S7-PLCSIM Advanced — it does **not**
 replace it. You still create and configure your virtual PLCs in the Siemens PLCSIM Advanced GUI as
-usual; PLCSIM-WebControl reads that workspace and adds what the GUI doesn't give you:
+usual; PLCSIM Auto-Start reads that workspace and adds what the GUI doesn't give you:
 
+- 🔄 **Automatic startup** — your PLCs come back up on their own after a server reboot, completely
+  unattended. This is the headline: the Siemens GUI has no way to do it.
 - 🌐 **Remote control from a browser** — power on, RUN, STOP and power off your PLCs from any machine
   on the network. Drive a simulation host from your own desktop or another VM, with no Siemens GUI and
   no remote-desktop session required.
-- 🔄 **Automatic startup** — have your PLCs come back up on their own after a server reboot,
-  completely unattended. The original GUI can't do this.
 - 💾 **Persistent by default** — every instance is registered against PLCSIM's persistent storage, so a
   PLC's downloaded program survives a restart. Combined with auto-start, a PLC comes back on its own
   after a reboot — nothing to re-open, nothing to re-download from TIA.
@@ -54,8 +54,8 @@ Beyond remote control and auto-start:
 ## Quick start (no programming needed)
 
 1. **Download** the project — green **Code** button → **Download ZIP**. You get
-   **`PLCSIM-WebControl-main.zip`** (the prebuilt `PlcsimWebControl.exe` is inside). Extract it anywhere;
-   it produces a `PLCSIM-WebControl-main` folder.
+   **`PLCSIM-AutoStart-main.zip`** (the prebuilt `PlcsimAutoStart.exe` is inside). Extract it anywhere;
+   it produces a `PLCSIM-AutoStart-main` folder.
 2. **Double-click `Install.cmd`** and accept the admin prompt (UAC). It sets everything up: detects
    your PLCSIM Advanced install, makes the UI reachable from the LAN (no authentication; it opens the
    firewall for the port), creates `appconfig.txt`, installs an always-on **Windows Service** (Start/Stop
@@ -72,8 +72,8 @@ That's it. To remove it later, run `.\scripts\uninstall.ps1` as administrator.
 
 ## For developers
 
-The prebuilt `PlcsimWebControl.exe` ships in the repo. Only if you change the backend
-(`src\PlcsimWebControl.cs`) or UI (`wwwroot\index.html`), rebuild with `.\scripts\build.ps1` — no IDE
+The prebuilt `PlcsimAutoStart.exe` ships in the repo. Only if you change the backend
+(`src\PlcsimAutoStart.cs`) or UI (`wwwroot\index.html`), rebuild with `.\scripts\build.ps1` — no IDE
 needed, just the in-box .NET Framework compiler.
 
 ---

@@ -1,11 +1,11 @@
-# uninstall.ps1 - Removes the PLCSIM-WebControl Windows Service / scheduled task and its LAN bindings.
+# uninstall.ps1 - Removes the PLCSIM-AutoStart Windows Service / scheduled task and its LAN bindings.
 #
 # RUN THIS IN AN ELEVATED POWERSHELL (Run as administrator).
 # It does NOT delete the program files, your appconfig.txt, logs, or PLCSIM workspaces.
 
 param(
     [int]$Port = 8090,
-    [string]$TaskName = "PLCSIM WebControl"
+    [string]$TaskName = "PLCSIM AutoStart"
 )
 
 $ErrorActionPreference = "SilentlyContinue"
@@ -26,7 +26,15 @@ if ($svc) {
 Stop-ScheduledTask -TaskName $TaskName
 Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
 # The web app process (launched in the interactive session)
+Get-Process PlcsimAutoStart | Stop-Process -Force
+
+# Legacy: also remove the pre-rename "PLCSIM WebControl" service/task/process, if present.
+$legacy = "PLCSIM WebControl"
+$lsvc = Get-Service -Name $legacy -ErrorAction SilentlyContinue
+if ($lsvc) { Stop-Service -Name $legacy -Force -ErrorAction SilentlyContinue; & sc.exe delete "$legacy" | Out-Null }
+Unregister-ScheduledTask -TaskName $legacy -Confirm:$false
 Get-Process PlcsimWebControl | Stop-Process -Force
+Get-NetFirewallRule -DisplayName "$legacy $Port" -ErrorAction SilentlyContinue | Remove-NetFirewallRule -ErrorAction SilentlyContinue
 
 Write-Host "Removing LAN URL reservation and firewall rule (if any)..."
 cmd /c "netsh http delete urlacl url=http://+:$Port/" | Out-Null
