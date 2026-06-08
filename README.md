@@ -82,25 +82,23 @@ needed, just the in-box .NET Framework compiler.
 
 ## Enabling auto-start: capacity and the freeze-loop risk
 
-Auto-start powers your PLCs on at every boot. A virtual S7-PLCSIM PLC uses real CPU and RAM, so one
-setting needs to match what the machine can handle.
+Auto-start turns your PLCs on every time the machine boots. Each virtual PLC uses real CPU and memory,
+so one setting needs to match what your machine can handle.
 
-**The risk.** If auto-start brings up more PLCs than the machine can run at once, the host can slow down
-or lock up while they start. This happens during boot, so it can freeze the machine before Windows even
-finishes starting or reaches the login screen — being in front of it doesn't necessarily let you stop
-it. And because auto-start runs on every boot, a freeze that forces a restart hits the same overload
-again on the next boot: a freeze/reboot loop.
+**The risk.** If auto-start turns on more PLCs than the machine can run at once, it can slow down or
+freeze while they start. Auto-start runs on every boot, so if a freeze forces a restart, the same thing
+happens again on the next boot — a freeze/reboot loop.
 
-**The cap.** `hard_max_powered_on` (the auto-start cap) is the maximum number of PLCs auto-start will
-power on. Set it to the number this machine can run at once; the default is **1**. It applies only to
-auto-start — the manual limit `max_powered_on` can be higher for testing and does not change what
-happens at the next boot. Both are editable in the UI; raising the cap asks for confirmation.
+**The cap.** `hard_max_powered_on` (the auto-start cap) is the most PLCs auto-start will turn on. Set it
+to how many this machine can run at once. The default is **1**. It only affects auto-start — the manual
+limit `max_powered_on` can be higher for testing, and does not change what happens at the next boot. Both
+can be changed in the UI; raising the cap asks you to confirm.
 
-**The loop-breaker.** A backstop in case the cap is set too high. After each auto-start, the tool checks
-whether the machine actually came up healthy — not just that the PLCs report as *on*, but that the web
-interface keeps answering normally for a while, since a frozen machine can still look alive. If several
-boots in a row fail that check, the tool stops auto-starting and shows a red **SAFE MODE** banner in the
-web interface, with a *Re-enable* button to use once you have reduced the load.
+**The loop-breaker.** A backup in case the cap is too high. After each auto-start, the tool checks if the
+machine came up working — not just that the PLCs say they are on, but that the web page keeps responding
+for a while, because a frozen machine can still look alive. If several boots in a row fail this check,
+the tool stops turning PLCs on at boot and shows a red **SAFE MODE** banner, with a *Re-enable* button to
+use after you reduce the load.
 
 Every value is tunable in [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
