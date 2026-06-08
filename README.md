@@ -9,9 +9,9 @@ replace it. You still create and configure your virtual PLCs in the Siemens PLCS
 usual; PLCSIM Auto-Start reads that workspace and adds what the GUI doesn't give you:
 
 - 🔄 **Automatic startup** — your PLCs come back up on their own after a server reboot, completely
-  unattended. This is the headline feature. Before turning it on, read
-  [enabling auto-start safely](#enabling-auto-start-capacity-and-the-freeze-loop-risk) — there is one
-  capacity decision that keeps a busy machine from getting stuck on boot.
+  unattended. This is the headline feature. See
+  [enabling auto-start](#enabling-auto-start-capacity-and-the-freeze-loop-risk) for the one capacity
+  setting to get right first.
 - 🌐 **Remote control from a browser** — power on, RUN, STOP and power off your PLCs from any machine
   on the network. Manage a headless simulation host from your own desktop or another VM, with no
   remote-desktop session needed.
@@ -82,31 +82,23 @@ needed, just the in-box .NET Framework compiler.
 
 ## Enabling auto-start: capacity and the freeze-loop risk
 
-Auto-start powers your PLCs on at **every** boot, with no one watching. That convenience comes with one
-thing to get right, because a virtual S7-PLCSIM PLC is **heavy** — each running instance takes real CPU
-and RAM on the host.
+Auto-start powers your PLCs on at every boot. A virtual S7-PLCSIM PLC uses real CPU and RAM, so one
+setting needs to match what the machine can handle.
 
-**The failure mode (why the cap exists).** If you let auto-start bring up more PLCs than the machine can
-actually run at the same time, the host can bog down — or, in the worst case, lock up — while those
-instances all start at boot. And because auto-start runs again on *every* reboot, a freeze that forces a
-restart just hits the same overload again: **freeze → reboot → freeze**, a loop that can leave the
-machine unreachable until someone intervenes. Many PLCSIM users never run into this; but on a headless,
-auto-logon server it is exactly the situation that can turn a small misjudgment about capacity into a
-stuck box. The point isn't that it *will* freeze — it's that nobody is there to catch it if it does.
+**The risk.** If auto-start brings up more PLCs than the machine can run at once, the host can slow down
+or lock up while they start. Since auto-start runs on every boot, a freeze that forces a restart repeats
+on the next boot — a freeze/reboot loop. On an unattended server there is no one there to stop it.
 
-**The decision you make.** The *auto-start cap* (`hard_max_powered_on`) is simply **the most PLCs you are
-confident this machine can run unattended at once**. Auto-start never brings up more than that, so the
-boot path stays inside a number you trust. The default is **1** — the safe baseline. It governs the
-**boot path only**: your manual power-on limit (`max_powered_on`) can go higher, so you can still test
-real capacity by hand without changing what happens on the next reboot. Both are editable in the UI (the
-cap behind a confirmation, since raising it is the risky direction).
+**The cap.** `hard_max_powered_on` (the auto-start cap) is the maximum number of PLCs auto-start will
+power on. Set it to the number this machine can run at once; the default is **1**. It applies only to
+auto-start — the manual limit `max_powered_on` can be higher for testing and does not change what
+happens at the next boot. Both are editable in the UI; raising the cap asks for confirmation.
 
-**The backstop, if a setup still misbehaves.** A loop-breaker watches for the freeze loop above: a
-counter is bumped before each auto-start and cleared only after the service passes repeated `/health`
-probes for a while — so a *soft freeze* (processes alive but the machine unresponsive) won't fool it
-into thinking the boot was clean. After `boot_fail_limit` boots that never stabilize, the service enters
-**SAFE MODE**: it skips auto-start, shows a red banner in the UI, and waits for you to fix the load and
-click *Re-enable*. This is the seatbelt — set the cap correctly and you should never need it.
+**The loop-breaker.** If a setup still does not stabilize, a counter is bumped before each auto-start and
+cleared only after the service passes repeated `/health` probes (so a soft freeze — processes alive but
+the machine unresponsive — does not count as a clean boot). After `boot_fail_limit` non-stabilizing
+boots, the service enters **SAFE MODE**: auto-start is skipped, a red banner shows in the UI, and a
+*Re-enable* button clears it once you have fixed the load.
 
 Every value is tunable in [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
