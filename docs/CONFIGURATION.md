@@ -29,18 +29,18 @@ only while the service is **stopped**. Start from `appconfig.example.txt`.
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `max_powered_on` | `1` | Operational limit for **manual** power-ons, editable from the UI. **Not** capped by the hard cap — raise it to test how many PLCs the machine handles. |
-| `hard_max_powered_on` | `1` | Safety cap for **auto-start only**: the max number of PLCs auto-start brings up at boot. Editable in the UI (with a warning) or here. After an unattended reboot, auto-start restores at most this many — so a manual test that froze the box still reboots safely. Raise it to how many PLCs the machine can definitely run at once. |
+| `max_powered_on` | `1` | The most PLCs you can power on by hand at once (editable in the UI). Not limited by the auto-start cap, so you can raise it to test how many your machine handles. |
+| `hard_max_powered_on` | `1` | The auto-start cap: the most PLCs auto-start turns on at boot. Set it to how many this machine can run at once. Editable in the UI (raising it asks you to confirm) or here. It only affects auto-start — the manual limit above can be higher. |
 
 ## Boot protections
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `boot_fail_limit` | `2` | Consecutive boots that never stabilize before the service enters SAFE MODE and skips auto-start. Set to `1` to trip after a single failed boot (most conservative). |
-| `stable_seconds` | `90` | Stability window after auto-start before a boot is declared "clean" (counter reset to 0). |
-| `start_stagger_ms` | `4000` | Pause between power-ons during the staggered auto-start. |
-| `health_probe_interval_ms` | `15000` | How often the self `/health` probe runs during the stability window. |
-| `health_timeout_ms` | `3000` | Strict timeout per probe. A probe slower than this counts as unhealthy (detects a soft freeze). |
+| `boot_fail_limit` | `2` | How many boots in a row can fail to come up working before the service stops auto-starting (SAFE MODE). Set to `1` to stop after a single bad boot. |
+| `stable_seconds` | `90` | How long after auto-start the machine must keep responding before the boot counts as good (the fail counter resets to 0). |
+| `start_stagger_ms` | `4000` | Pause between power-ons during auto-start, so they don't all start at the same time. |
+| `health_probe_interval_ms` | `15000` | How often, during the stability window, the tool checks that its own web page still responds. |
+| `health_timeout_ms` | `3000` | If a check takes longer than this, it counts as failed — the sign of a machine that looks alive but is frozen. |
 | `last_running` | (managed) | Internal: the last powered-on set, used by `autostart_mode = last`. Leave blank. |
 
 ## Network

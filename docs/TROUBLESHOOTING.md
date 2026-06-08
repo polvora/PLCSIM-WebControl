@@ -43,8 +43,8 @@ Start-Service "PLCSIM AutoStart"           # or: Start-ScheduledTask -TaskName "
 ```
 
 ## Red "SAFE MODE" banner
-Repeated boots never stabilized, so the loop-breaker skipped auto-start on purpose. If it's overloaded,
-lower the **auto-start cap** (`hard_max_powered_on`), then click **Re-enable auto-start**.
+Several boots in a row didn't come up working, so the tool skipped auto-start on purpose. If the machine
+is overloaded, lower the **auto-start cap** (`hard_max_powered_on`), then click **Re-enable auto-start**.
 
 ## Official control panel / TIA says "no connection to PLCSIM Advanced"
 The service holds a live connection to the PLCSIM runtime, and the official tools can't connect at the

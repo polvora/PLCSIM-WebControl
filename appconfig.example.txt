@@ -25,20 +25,21 @@ autostart_mode = last
 autostart_instance =
 
 # ---- Power-on limit ----
-# Operational limit (also editable from the web UI).
+# The most PLCs you can power on by hand at once (also editable in the UI).
 max_powered_on = 1
-# Auto-start safety cap: the MAX number of PLCs auto-start brings up at boot (also editable in the UI).
-# Default 1. Raise it to how many PLCs the machine can run at the same time without freezing.
+# The auto-start cap: the most PLCs auto-start turns on at boot (also editable in the UI).
+# Set it to how many this machine can run at once. Only affects auto-start; the manual limit can be higher.
 hard_max_powered_on = 1
 
 # ---- Boot protections (loop-breaker) ----
-# Consecutive boots that never stabilize before the service enters SAFE MODE and skips auto-start.
+# How many boots in a row can fail to come up working before the service stops auto-starting (SAFE MODE).
 boot_fail_limit = 2
-# Stability window (seconds) after auto-start before a boot is declared "clean".
+# How long (seconds) after auto-start the machine must keep responding before the boot counts as good.
 stable_seconds = 90
-# Pause (ms) between power-ons during the staggered auto-start.
+# Pause (ms) between power-ons during auto-start, so they don't all start at the same time.
 start_stagger_ms = 4000
-# Self /health probe cadence and strict timeout (detects a "soft freeze" of the web layer).
+# How often (ms) the tool checks its own web page, and how long a check may take before it counts as
+# failed (the sign of a machine that looks alive but is frozen).
 health_probe_interval_ms = 15000
 health_timeout_ms = 3000
 # Internal state; leave blank.
