@@ -28,7 +28,7 @@ autostart_instance =
 # Operational limit (also editable from the web UI).
 max_powered_on = 1
 # Auto-start safety cap: the MAX number of PLCs auto-start brings up at boot (also editable in the UI).
-# Default 1. Raise it to how many PLCs the machine can run unattended without freezing.
+# Default 1. Raise it to how many PLCs the machine can run at the same time without freezing.
 hard_max_powered_on = 1
 
 # ---- Boot protections (loop-breaker) ----

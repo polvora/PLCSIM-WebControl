@@ -156,12 +156,13 @@
 <div id="modalBg">
   <div class="modal">
     <h3>⚠️ Change the auto-start cap</h3>
-    <p>This sets the <b>maximum number of PLCs that auto-start powers on after a reboot</b> — automatically, with <b>nobody watching</b>.</p>
+    <p>This is the <b>maximum number of PLCs that auto-start powers on automatically after a reboot</b>.</p>
     <div class="danger-box">
-      If you set this higher than this machine can actually run unattended, it <b>will freeze on boot</b>.
-      And because auto-start retries on every restart, the machine can drop into a <b>freeze → reboot → freeze loop</b>
-      (a built-in loop-breaker stops it after a couple of failed boots, but the machine is unusable until then).
-      Only raise it to a number you are <b>sure</b> this machine handles unattended.
+      Set it higher than this machine can run <b>at the same time</b> and it <b>can freeze</b> when those
+      PLCs start. And since auto-start runs on <b>every</b> reboot, that can turn into a
+      <b>freeze → reboot → freeze loop</b> (a built-in loop-breaker stops it after a couple of failed
+      boots, but the machine is unusable until then). Only raise it to a number you are <b>confident</b>
+      this machine can run at once.
     </div>
     <div class="mrow">
       <label class="sub">New cap:</label>

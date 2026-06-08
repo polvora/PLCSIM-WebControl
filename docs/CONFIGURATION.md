@@ -30,7 +30,7 @@ only while the service is **stopped**. Start from `appconfig.example.txt`.
 | Key | Default | Meaning |
 |-----|---------|---------|
 | `max_powered_on` | `1` | Operational limit for **manual** power-ons, editable from the UI. **Not** capped by the hard cap — raise it to test how many PLCs the machine handles. |
-| `hard_max_powered_on` | `1` | Safety cap for **auto-start only**: the max number of PLCs auto-start brings up at boot. Editable in the UI (with a warning) or here. After an unattended reboot, auto-start restores at most this many — so a manual test that froze the box still reboots safely. Raise it to how many the machine can definitely run unattended. |
+| `hard_max_powered_on` | `1` | Safety cap for **auto-start only**: the max number of PLCs auto-start brings up at boot. Editable in the UI (with a warning) or here. After an unattended reboot, auto-start restores at most this many — so a manual test that froze the box still reboots safely. Raise it to how many PLCs the machine can definitely run at once. |
 
 ## Boot protections
 
